@@ -59,6 +59,12 @@ func run() (string, error) {
 		panic("unexpected error")
 	}
 
+	// Clear the TUI from the terminal
+	viewOutput := m.View()
+	lineCount := strings.Count(viewOutput, "\n")
+	clearSequence := fmt.Sprintf("\033[%dA\033[J", lineCount)
+	_, _ = tty.WriteString(clearSequence)
+
 	// If cancelled (Ctrl-C), exit without saving or outputting
 	if m.Cancelled() {
 		return "", nil
