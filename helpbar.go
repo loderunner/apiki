@@ -14,7 +14,7 @@ func (m Model) viewHelpBar() string {
 
 	labelStyle := lipgloss.NewStyle().
 		Foreground(colorWhite).
-		MarginRight(2)
+		PaddingRight(1)
 
 	var items []string
 

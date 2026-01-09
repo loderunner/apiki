@@ -74,14 +74,24 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, textinput.Blink
 
 	case "up", "k":
+		if len(m.filteredIndices) == 0 {
+			return m, nil
+		}
 		if m.cursor > 0 {
 			m.cursor--
+		} else {
+			m.cursor = len(m.filteredIndices) - 1
 		}
 		return m, nil
 
 	case "down", "j":
+		if len(m.filteredIndices) == 0 {
+			return m, nil
+		}
 		if m.cursor < len(m.filteredIndices)-1 {
 			m.cursor++
+		} else {
+			m.cursor = 0
 		}
 		return m, nil
 
