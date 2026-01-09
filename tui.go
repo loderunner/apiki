@@ -241,19 +241,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // updateInputWidths sets the width of all text inputs based on available
 // terminal width.
 func (m Model) updateInputWidths() Model {
-	// Reserve space for label (8 chars) + "> " (2 chars) + some margin
-	inputWidth := 40
-	if m.width > 0 {
-		// Use available width minus label space, with a reasonable minimum
-		inputWidth = m.width - 10
-		if inputWidth < 20 {
-			inputWidth = 20
+	for _, input := range []*textinput.Model{
+		&m.nameInput,
+		&m.valueInput,
+		&m.labelInput,
+		&m.filterInput,
+	} {
+		width := 2
+		if input.Value() != "" {
+			width = len(input.Value()) + 2
+		} else if input.Placeholder != "" {
+			width = len(input.Placeholder) + 2
 		}
+		input.Width = min(width, m.width-8)
 	}
-	m.nameInput.Width = inputWidth
-	m.valueInput.Width = inputWidth
-	m.labelInput.Width = inputWidth
-	m.filterInput.Width = inputWidth
 	return m
 }
 
@@ -284,6 +285,7 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		var cmd tea.Cmd
 		m.filterInput, cmd = m.filterInput.Update(msg)
+		m.recomputeFilter()
 		return m, cmd
 	}
 
