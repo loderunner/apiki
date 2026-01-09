@@ -50,20 +50,21 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	// List mode keys
 	switch key {
-	case "ctrl+c":
+	case "ctrl+c", "q":
 		m.cancelled = true
 		return m, tea.Quit
 
-	case "q":
-		m.quitting = true
-		return m, tea.Quit
-
 	case "esc":
-		// Clear filter if one is active
 		if m.filterInput.Value() != "" {
 			m = m.clearFilter()
+			return m, nil
 		}
-		return m, nil
+		m.cancelled = true
+		return m, tea.Quit
+
+	case "enter":
+		m.quitting = true
+		return m, tea.Quit
 
 	case "/":
 		m.filtering = true
@@ -84,7 +85,7 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
-	case "enter":
+	case "=":
 		if len(m.filteredIndices) > 0 {
 			m = m.clearFilter()
 			actualIndex := m.filteredIndices[m.cursor]

@@ -25,28 +25,28 @@ func (m Model) viewHelpBar() string {
 				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
 				keyStyle.Render("Esc") + labelStyle.Render("Cancel"),
 			}
+		} else if m.filterInput.Value() != "" {
+			items = []string{
+				keyStyle.Render("/") + labelStyle.Render("Filter"),
+				keyStyle.Render("Esc") + labelStyle.Render("Clear"),
+				keyStyle.Render("↑↓") + labelStyle.Render("Move"),
+				keyStyle.Render("Space") + labelStyle.Render("Toggle"),
+				keyStyle.Render("+") + labelStyle.Render("Add"),
+				keyStyle.Render("=") + labelStyle.Render("Edit"),
+				keyStyle.Render("-") + labelStyle.Render("Delete"),
+				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
+				keyStyle.Render("q") + labelStyle.Render("Cancel"),
+			}
 		} else {
 			items = []string{
 				keyStyle.Render("/") + labelStyle.Render("Filter"),
 				keyStyle.Render("↑↓") + labelStyle.Render("Move"),
 				keyStyle.Render("Space") + labelStyle.Render("Toggle"),
 				keyStyle.Render("+") + labelStyle.Render("Add"),
-				keyStyle.Render("Enter") + labelStyle.Render("Edit"),
+				keyStyle.Render("=") + labelStyle.Render("Edit"),
 				keyStyle.Render("-") + labelStyle.Render("Delete"),
-				keyStyle.Render("q") + labelStyle.Render("Quit"),
-			}
-			if m.filterInput.Value() != "" {
-				// Insert "Esc Clear" after "/" when filter is active
-				items = []string{
-					keyStyle.Render("/") + labelStyle.Render("Filter"),
-					keyStyle.Render("Esc") + labelStyle.Render("Clear"),
-					keyStyle.Render("↑↓") + labelStyle.Render("Move"),
-					keyStyle.Render("Space") + labelStyle.Render("Toggle"),
-					keyStyle.Render("+") + labelStyle.Render("Add"),
-					keyStyle.Render("Enter") + labelStyle.Render("Edit"),
-					keyStyle.Render("-") + labelStyle.Render("Delete"),
-					keyStyle.Render("q") + labelStyle.Render("Quit"),
-				}
+				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
+				keyStyle.Render("q") + labelStyle.Render("Cancel"),
 			}
 		}
 	case modeAdd, modeEdit:
