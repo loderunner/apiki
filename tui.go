@@ -73,6 +73,10 @@ type Model struct {
 	width  int
 	height int
 
+	// Validation errors for form fields
+	nameError  string
+	valueError string
+
 	// nameGroupsMemo memoizes the name groups for faster lookup
 	nameGroupsMemo map[string][]int
 
@@ -336,6 +340,8 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.valueInput.SetValue(entry.Value)
 			m.labelInput.SetValue(entry.Label)
 			m.currentField = fieldName
+			m.nameError = ""
+			m.valueError = ""
 			m = m.updateInputWidths()
 			m.nameInput.Focus()
 			return m, textinput.Blink
@@ -368,6 +374,8 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.valueInput.SetValue("")
 		m.labelInput.SetValue("")
 		m.currentField = fieldName
+		m.nameError = ""
+		m.valueError = ""
 		m = m.updateInputWidths()
 		m.nameInput.Focus()
 		return m, textinput.Blink
@@ -390,6 +398,8 @@ func (m Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "esc":
 		m.clearFilter()
 		m.mode = modeList
+		m.nameError = ""
+		m.valueError = ""
 		return m, nil
 
 	case "tab", "down":
@@ -410,8 +420,16 @@ func (m Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch m.currentField {
 	case fieldName:
 		m.nameInput, cmd = m.nameInput.Update(msg)
+		// Clear error when user starts typing
+		if m.nameError != "" {
+			m.nameError = ""
+		}
 	case fieldValue:
 		m.valueInput, cmd = m.valueInput.Update(msg)
+		// Clear error when user starts typing
+		if m.valueError != "" {
+			m.valueError = ""
+		}
 	case fieldLabel:
 		m.labelInput, cmd = m.labelInput.Update(msg)
 	}
@@ -460,18 +478,34 @@ func (m Model) prevField() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) saveFormEntry() (tea.Model, tea.Cmd) {
-	entry := Entry{
-		Name:     strings.TrimSpace(m.nameInput.Value()),
-		Value:    m.valueInput.Value(),
-		Label:    strings.TrimSpace(m.labelInput.Value()),
-		Selected: false,
+	name := strings.TrimSpace(m.nameInput.Value())
+	value := m.valueInput.Value()
+
+	// Validate fields
+	m.nameError = ""
+	m.valueError = ""
+	valid := true
+
+	if name == "" {
+		m.nameError = "name cannot be empty"
+		valid = false
 	}
 
-	if entry.Name == "" {
-		// Don't save entries without a name
-		m.clearFilter()
-		m.mode = modeList
+	if value == "" {
+		m.valueError = "value cannot be empty"
+		valid = false
+	}
+
+	// Don't save if validation fails
+	if !valid {
 		return m, nil
+	}
+
+	entry := Entry{
+		Name:     name,
+		Value:    value,
+		Label:    strings.TrimSpace(m.labelInput.Value()),
+		Selected: false,
 	}
 
 	if m.editIndex >= 0 {
@@ -510,6 +544,8 @@ func (m Model) saveFormEntry() (tea.Model, tea.Cmd) {
 	}
 
 	m.mode = modeList
+	m.nameError = ""
+	m.valueError = ""
 	return m, nil
 }
 
@@ -671,13 +707,25 @@ func (m Model) viewForm(title string) string {
 	b.WriteString("\n\n")
 
 	labelStyle := lipgloss.NewStyle().Width(8)
+	errorStyle := lipgloss.
+		NewStyle().
+		Foreground(colorBrightRed).
+		Italic(true)
 
 	b.WriteString(labelStyle.Render("Name:"))
 	b.WriteString(m.nameInput.View())
+	if m.nameError != "" {
+		b.WriteString(" ")
+		b.WriteString(errorStyle.Render(m.nameError))
+	}
 	b.WriteString("\n")
 
 	b.WriteString(labelStyle.Render("Value:"))
 	b.WriteString(m.valueInput.View())
+	if m.valueError != "" {
+		b.WriteString(" ")
+		b.WriteString(errorStyle.Render(m.valueError))
+	}
 	b.WriteString("\n")
 
 	b.WriteString(labelStyle.Render("Label:"))
