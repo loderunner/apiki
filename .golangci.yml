@@ -1,0 +1,17 @@
+version: '2'
+
+linters:
+  settings:
+    lll:
+      line-length: 80
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - ineffassign
+    - unused
+    - lll
+
+formatters:
+  enable:
+    - gofumpt
