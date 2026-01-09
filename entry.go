@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 )
 
 // Entry represents an environment variable entry managed by apiki.
@@ -22,6 +24,19 @@ type Entry struct {
 	// Selected indicates whether this entry should be exported (true) or unset
 	// (false). Not serialized to JSON.
 	Selected bool `json:"-"`
+}
+
+// SortEntries sorts entries alphabetically by (Name, Label), case-insensitive.
+func SortEntries(entries []Entry) {
+	slices.SortFunc(entries, func(a, b Entry) int {
+		if c := strings.Compare(
+			strings.ToLower(a.Name),
+			strings.ToLower(b.Name),
+		); c != 0 {
+			return c
+		}
+		return strings.Compare(strings.ToLower(a.Label), strings.ToLower(b.Label))
+	})
 }
 
 // DefaultEntriesPath returns the default path for the entries file:
@@ -83,10 +98,35 @@ func SaveEntries(path string, entries []Entry) error {
 // SyncWithEnvironment updates the Selected state of each entry based on
 // whether the environment variable is currently set.
 //
-// An entry is marked as Selected if os.Getenv returns a non-empty value for its
-// Name.
+// An entry is marked as Selected if both its Name and Value match the current
+// environment. For entries with duplicate names (radio groups), only the entry
+// whose value matches the environment is selected. If no exact match is found,
+// no entry with that name is selected.
 func SyncWithEnvironment(entries []Entry) {
+	// Track which names we've already selected (for radio-group behavior)
+	selectedNames := make(map[string]struct{})
+
 	for i := range entries {
-		entries[i].Selected = os.Getenv(entries[i].Name) != ""
+		name := entries[i].Name
+		envVal := os.Getenv(name)
+
+		if envVal == "" {
+			entries[i].Selected = false
+			continue
+		}
+
+		// If we already selected an entry for this name, skip
+		if _, ok := selectedNames[name]; ok {
+			entries[i].Selected = false
+			continue
+		}
+
+		// Select only if both name and value match the environment
+		if entries[i].Value == envVal {
+			entries[i].Selected = true
+			selectedNames[name] = struct{}{}
+		} else {
+			entries[i].Selected = false
+		}
 	}
 }

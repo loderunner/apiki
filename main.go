@@ -33,6 +33,12 @@ func run() (string, error) {
 	// Sync selection state with current environment
 	SyncWithEnvironment(entries)
 
+	// Capture which variables were originally set in the environment
+	originallySet := make(map[string]bool)
+	for _, entry := range entries {
+		originallySet[entry.Name] = entry.Selected
+	}
+
 	// Open TTY for TUI input/output, keeping stdout clean for shell commands
 	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {
@@ -65,7 +71,7 @@ func run() (string, error) {
 		}
 
 		// Output export/unset commands to stdout
-		output := generateShellCommands(m.Entries())
+		output := generateShellCommands(m.Entries(), originallySet)
 		return output, nil
 	}
 
@@ -73,11 +79,21 @@ func run() (string, error) {
 }
 
 // generateShellCommands produces export and unset statements for the given
-// entries. Selected entries get exported, deselected entries get unset.
-func generateShellCommands(entries []Entry) string {
+// entries. Selected entries get exported. Only entries that were originally
+// set in the environment get unset when deselected.
+func generateShellCommands(
+	entries []Entry,
+	originallySet map[string]bool,
+) string {
 	commands := make([]string, 0, len(entries))
+	handledNames := make(map[string]struct{})
 
 	for _, entry := range entries {
+		if _, ok := handledNames[entry.Name]; ok {
+			continue
+		}
+		handledNames[entry.Name] = struct{}{}
+
 		if entry.Selected {
 			// Escape single quotes in value: replace ' with '\''
 			escaped := strings.ReplaceAll(entry.Value, "'", "'\\''")
@@ -85,7 +101,8 @@ func generateShellCommands(entries []Entry) string {
 				commands,
 				fmt.Sprintf("export %s='%s'", entry.Name, escaped),
 			)
-		} else {
+		} else if originallySet[entry.Name] {
+			// Only unset variables that were originally set
 			commands = append(commands, fmt.Sprintf("unset %s", entry.Name))
 		}
 	}
