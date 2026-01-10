@@ -16,7 +16,7 @@ func (s entrySource) Len() int {
 }
 
 func (s entrySource) String(i int) string {
-	return s[i].Name + " " + s[i].Label
+	return s[i].FuzzyTarget()
 }
 
 // recomputeFilter updates filteredIndices based on the current filter query.

@@ -24,6 +24,30 @@ type Entry struct {
 	// Selected indicates whether this entry should be exported (true) or unset
 	// (false). Not serialized to JSON.
 	Selected bool `json:"-"`
+
+	// SourceFile is the path to the .env file this entry came from.
+	// Empty string means the entry came from the apiki file.
+	// Not serialized to JSON.
+	SourceFile string `json:"-"`
+}
+
+// FuzzyTarget returns the string to use for fuzzy matching this entry.
+// For .env entries, this includes the directory/filename without the "from"
+// prefix.
+func (e Entry) FuzzyTarget() string {
+	if e.SourceFile == "" {
+		if e.Label == "" {
+			return e.Name
+		}
+		return e.Name + " " + e.Label
+	}
+
+	// Extract dirname/filename from SourceFile for search
+	// SourceFile contains the full path, but we want just dirname/filename
+	dir := filepath.Dir(e.SourceFile)
+	filename := filepath.Base(e.SourceFile)
+	dirname := filepath.Base(dir)
+	return e.Name + " " + dirname + "/" + filename
 }
 
 // SortEntries sorts entries alphabetically by (Name, Label), case-insensitive.

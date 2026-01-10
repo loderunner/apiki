@@ -25,29 +25,47 @@ func (m Model) viewHelpBar() string {
 				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
 				keyStyle.Render("Esc") + labelStyle.Render("Cancel"),
 			}
-		} else if m.filterInput.Value() != "" {
-			items = []string{
-				keyStyle.Render("/") + labelStyle.Render("Filter"),
-				keyStyle.Render("Esc") + labelStyle.Render("Clear"),
-				keyStyle.Render("↑↓") + labelStyle.Render("Move"),
-				keyStyle.Render("Space") + labelStyle.Render("Toggle"),
-				keyStyle.Render("+") + labelStyle.Render("Add"),
-				keyStyle.Render("=") + labelStyle.Render("Edit"),
-				keyStyle.Render("-") + labelStyle.Render("Delete"),
-				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
-				keyStyle.Render("q") + labelStyle.Render("Cancel"),
-			}
 		} else {
-			items = []string{
-				keyStyle.Render("/") + labelStyle.Render("Filter"),
-				keyStyle.Render("↑↓") + labelStyle.Render("Move"),
-				keyStyle.Render("Space") + labelStyle.Render("Toggle"),
-				keyStyle.Render("+") + labelStyle.Render("Add"),
-				keyStyle.Render("=") + labelStyle.Render("Edit"),
-				keyStyle.Render("-") + labelStyle.Render("Delete"),
-				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
-				keyStyle.Render("q") + labelStyle.Render("Cancel"),
+			// Check if current entry is from .env file
+			isDotEnvEntry := false
+			if len(m.filteredIndices) > 0 && m.cursor < len(m.filteredIndices) {
+				actualIndex := m.filteredIndices[m.cursor]
+				if actualIndex < len(m.entries) {
+					isDotEnvEntry = m.entries[actualIndex].SourceFile != ""
+				}
 			}
+
+			baseItems := []string{
+				keyStyle.Render("/") + labelStyle.Render("Filter"),
+			}
+			if m.filterInput.Value() != "" {
+				baseItems = append(baseItems,
+					keyStyle.Render("Esc")+labelStyle.Render("Clear"),
+				)
+			}
+			baseItems = append(baseItems,
+				keyStyle.Render("↑↓")+labelStyle.Render("Move"),
+				keyStyle.Render("Space")+labelStyle.Render("Toggle"),
+				keyStyle.Render("+")+labelStyle.Render("Create"),
+			)
+
+			if isDotEnvEntry {
+				baseItems = append(baseItems,
+					keyStyle.Render("=")+labelStyle.Render("Add&Edit"),
+				)
+			} else {
+				baseItems = append(baseItems,
+					keyStyle.Render("=")+labelStyle.Render("Edit"),
+					keyStyle.Render("-")+labelStyle.Render("Delete"),
+				)
+			}
+
+			baseItems = append(baseItems,
+				keyStyle.Render("Enter")+labelStyle.Render("Apply"),
+				keyStyle.Render("q")+labelStyle.Render("Cancel"),
+			)
+
+			items = baseItems
 		}
 	case modeAdd, modeEdit:
 		items = []string{
@@ -57,6 +75,11 @@ func (m Model) viewHelpBar() string {
 			keyStyle.Render("Esc") + labelStyle.Render("Cancel"),
 		}
 	case modeConfirmDelete:
+		items = []string{
+			keyStyle.Render("y/Enter") + labelStyle.Render("Yes"),
+			keyStyle.Render("n/Esc") + labelStyle.Render("No"),
+		}
+	case modeConfirmPromote:
 		items = []string{
 			keyStyle.Render("y/Enter") + labelStyle.Render("Yes"),
 			keyStyle.Render("n/Esc") + labelStyle.Render("No"),

@@ -25,10 +25,18 @@ func run() (string, error) {
 		return "", fmt.Errorf("could not get entries path: %w", err)
 	}
 
-	entries, err := LoadEntries(entriesPath)
+	apikiEntries, err := LoadEntries(entriesPath)
 	if err != nil {
 		return "", fmt.Errorf("could not load entries: %w", err)
 	}
+
+	dotEnvEntries, err := LoadDotEnvEntries()
+	if err != nil {
+		return "", fmt.Errorf("could not load .env entries: %w", err)
+	}
+
+	// Combine apiki entries with .env entries (no deduplication)
+	entries := append(apikiEntries, dotEnvEntries...)
 
 	// Capture the environment state for all entry names at startup
 	envSnapshot := captureEnvironment(entries)
@@ -69,7 +77,14 @@ func run() (string, error) {
 
 	// If quitting normally, save entries and output shell commands
 	if m.Quitting() {
-		if err := SaveEntries(entriesPath, m.Entries()); err != nil {
+		// Only save apiki entries (those without SourceFile)
+		apikiEntriesToSave := make([]Entry, 0)
+		for _, entry := range m.Entries() {
+			if entry.SourceFile == "" {
+				apikiEntriesToSave = append(apikiEntriesToSave, entry)
+			}
+		}
+		if err := SaveEntries(entriesPath, apikiEntriesToSave); err != nil {
 			return "", fmt.Errorf("could not save apiki entries file: %w", err)
 		}
 

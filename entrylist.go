@@ -178,18 +178,15 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if len(m.filteredIndices) > 0 {
 			m = m.clearFilter()
 			actualIndex := m.filteredIndices[m.cursor]
-			m.mode = modeEdit
-			m.editIndex = actualIndex
 			entry := m.entries[actualIndex]
-			m.nameInput.SetValue(entry.Name)
-			m.valueInput.SetValue(entry.Value)
-			m.labelInput.SetValue(entry.Label)
-			m.currentField = fieldName
-			m.nameError = ""
-			m.valueError = ""
-			m = m.updateInputWidths()
-			m.nameInput.Focus()
-			return m, textinput.Blink
+			if entry.SourceFile != "" {
+				// .env entry: show promote confirmation
+				m.mode = modeConfirmPromote
+			} else {
+				// apiki entry: edit directly
+				m.mode = modeEdit
+				return m.prepareForm(actualIndex, &entry)
+			}
 		}
 		return m, nil
 
@@ -212,22 +209,19 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 
 	case "+":
-		m.clearFilter()
+		m = m.clearFilter()
 		m.mode = modeAdd
-		m.editIndex = -1
-		m.nameInput.SetValue("")
-		m.valueInput.SetValue("")
-		m.labelInput.SetValue("")
-		m.currentField = fieldName
-		m.nameError = ""
-		m.valueError = ""
-		m = m.updateInputWidths()
-		m.nameInput.Focus()
-		return m, textinput.Blink
+		return m.prepareForm(-1, nil)
 
 	case "backspace", "delete", "-":
 		if len(m.filteredIndices) > 0 {
-			m.mode = modeConfirmDelete
+			actualIndex := m.filteredIndices[m.cursor]
+			entry := m.entries[actualIndex]
+			// Block deletion of .env entries
+			if entry.SourceFile == "" {
+				m.mode = modeConfirmDelete
+			}
+			// Otherwise ignore the keypress for .env entries
 		}
 	}
 
@@ -349,12 +343,22 @@ func (m Model) viewList() string {
 			// Highlight matches in label
 			if entry.Label != "" {
 				labelOffset := len(entry.Name) + 1
-				label = " " + highlightMatches(
+				// For .env entries, the fuzzy target doesn't include "from "
+				// prefix but the label does, so highlight only the part after
+				// "from " to match the fuzzy target structure
+				labelText := entry.Label
+				labelPrefix := ""
+				if entry.SourceFile != "" && strings.HasPrefix(entry.Label, "from ") {
+					labelPrefix = entry.Label[:5] // "from "
+					labelText = entry.Label[5:]   // "dirname/filename"
+				}
+				highlightedLabel := highlightMatches(
 					matchedIndexes,
-					entry.Label,
+					labelText,
 					labelOffset,
 					labelStyle,
 				)
+				label = " " + labelPrefix + highlightedLabel
 			}
 		} else {
 			name = nameStyle.Render(entry.Name)

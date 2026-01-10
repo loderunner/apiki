@@ -16,6 +16,7 @@ const (
 	modeAdd
 	modeEdit
 	modeConfirmDelete
+	modeConfirmPromote
 	modeError
 )
 
@@ -140,6 +141,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateForm(msg)
 		case modeConfirmDelete:
 			return m.updateConfirmDelete(msg)
+		case modeConfirmPromote:
+			return m.updateConfirmPromote(msg)
 		case modeError:
 			return m.updateError(msg)
 		}
@@ -161,6 +164,8 @@ func (m Model) View() string {
 		b.WriteString(m.viewForm("Edit Entry"))
 	case modeConfirmDelete:
 		b.WriteString(m.viewConfirmDelete())
+	case modeConfirmPromote:
+		b.WriteString(m.viewConfirmPromote())
 	case modeError:
 		b.WriteString(m.viewError())
 	}
@@ -220,6 +225,31 @@ func (m Model) clearFilter() Model {
 	return m.recomputeFilter()
 }
 
+// prepareForm sets up the form for editing or adding an entry.
+// If entry is provided, its values are pre-filled; otherwise fields are
+// cleared. Returns the updated model and a command to start text input
+// blinking.
+func (m Model) prepareForm(editIndex int, entry *Entry) (Model, tea.Cmd) {
+	m.editIndex = editIndex
+	m.currentField = fieldName
+	m.nameError = ""
+	m.valueError = ""
+
+	if entry != nil {
+		m.nameInput.SetValue(entry.Name)
+		m.valueInput.SetValue(entry.Value)
+		m.labelInput.SetValue(entry.Label)
+	} else {
+		m.nameInput.SetValue("")
+		m.valueInput.SetValue("")
+		m.labelInput.SetValue("")
+	}
+
+	m = m.updateInputWidths()
+	m.nameInput.Focus()
+	return m, textinput.Blink
+}
+
 // Quitting returns true if the user quit with 'q' (apply changes).
 func (m Model) Quitting() bool {
 	return m.quitting
@@ -236,9 +266,16 @@ func (m Model) Entries() []Entry {
 }
 
 // persistEntries saves the current entries to the configured file path.
+// Only saves apiki entries (those without SourceFile).
 // On error, switches to error mode to display the message.
 func (m Model) persistEntries() Model {
-	if err := SaveEntries(m.entriesPath, m.entries); err != nil {
+	apikiEntries := make([]Entry, 0)
+	for _, entry := range m.entries {
+		if entry.SourceFile == "" {
+			apikiEntries = append(apikiEntries, entry)
+		}
+	}
+	if err := SaveEntries(m.entriesPath, apikiEntries); err != nil {
 		m.errorMessage = "Failed to save entries: " + err.Error()
 		m.mode = modeError
 	}
