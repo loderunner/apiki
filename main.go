@@ -19,8 +19,28 @@ func main() {
 	}
 }
 
+// resolveEntriesPath determines the entries file path using the following
+// priority:
+// 1. CLI argument (first positional arg)
+// 2. APIKI_ENTRIES_PATH environment variable
+// 3. Default path (~/.apiki/variables.json)
+func resolveEntriesPath() (string, error) {
+	// 1. Check CLI argument
+	if len(os.Args) > 1 {
+		return os.Args[1], nil
+	}
+
+	// 2. Check environment variable
+	if envPath := os.Getenv("APIKI_ENTRIES_PATH"); envPath != "" {
+		return envPath, nil
+	}
+
+	// 3. Fall back to default
+	return DefaultEntriesPath()
+}
+
 func run() (string, error) {
-	entriesPath, err := DefaultEntriesPath()
+	entriesPath, err := resolveEntriesPath()
 	if err != nil {
 		return "", fmt.Errorf("could not get entries path: %w", err)
 	}
