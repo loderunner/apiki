@@ -14,7 +14,7 @@ func fuzzyMatch(entry Entry, query string) bool {
 		return true
 	}
 
-	target := entry.Name + " " + entry.Label
+	target := entry.Name + entry.Label
 	targetLower := strings.ToLower(target)
 	queryLower := strings.ToLower(query)
 

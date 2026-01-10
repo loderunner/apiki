@@ -9,6 +9,56 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// highlightMatches finds matching positions in the target string and
+// highlights matching characters in the text portion. The offset parameter
+// indicates the starting position of text within the target string used for
+// fuzzy matching.
+func highlightMatches(
+	target string,
+	text string,
+	query string,
+	offset int,
+	baseStyle lipgloss.Style,
+) string {
+	if query == "" {
+		return baseStyle.Render(text)
+	}
+
+	// Find match positions in target
+	targetLower := strings.ToLower(target)
+	queryLower := strings.ToLower(query)
+	matchPositions := make(map[int]bool)
+
+	queryIdx := 0
+	for i := 0; i < len(targetLower) && queryIdx < len(queryLower); i++ {
+		if targetLower[i] == queryLower[queryIdx] {
+			matchPositions[i] = true
+			queryIdx++
+		}
+	}
+
+	if len(matchPositions) == 0 {
+		return baseStyle.Render(text)
+	}
+
+	// Highlight matching characters in text
+	highlightStyle := baseStyle.
+		Foreground(colorBrightYellow).
+		Bold(true)
+
+	var result strings.Builder
+	for i, r := range text {
+		pos := offset + i
+		if matchPositions[pos] {
+			result.WriteString(highlightStyle.Render(string(r)))
+		} else {
+			result.WriteString(baseStyle.Render(string(r)))
+		}
+	}
+
+	return result.String()
+}
+
 // nameGroups returns a map of name -> indices of entries with that name.
 // Used to identify entries that belong to the same group (same variable name).
 func (m Model) nameGroups() map[string][]int {
@@ -239,10 +289,30 @@ func (m Model) viewList() string {
 			groupPrefix = "  "
 		}
 
-		name := nameStyle.Render(entry.Name)
-		label := ""
-		if entry.Label != "" {
-			label = " " + labelStyle.Render(entry.Label)
+		var name string
+		var label string
+
+		query := strings.TrimSpace(m.filterInput.Value())
+		if query != "" {
+			// Find match positions and highlight in combined "name label" string
+			target := entry.Name + entry.Label
+			name = highlightMatches(target, entry.Name, query, 0, nameStyle)
+			// Highlight matches in label
+			if entry.Label != "" {
+				labelOffset := len(entry.Name)
+				label = " " + highlightMatches(
+					target,
+					entry.Label,
+					query,
+					labelOffset,
+					labelStyle,
+				)
+			}
+		} else {
+			name = nameStyle.Render(entry.Name)
+			if entry.Label != "" {
+				label = " " + labelStyle.Render(entry.Label)
+			}
 		}
 
 		fmt.Fprintf(&b, "%s%s%s%s%s\n", cursor, groupPrefix, checkbox, name, label)
