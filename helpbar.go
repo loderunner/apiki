@@ -13,13 +13,12 @@ func (m Model) viewHelpBar() string {
 		Padding(0, 1)
 
 	labelStyle := lipgloss.NewStyle().
-		Foreground(colorWhite).
-		PaddingRight(1)
+		Foreground(colorWhite)
 
 	var items []string
 
 	switch m.mode {
-	case modeList:
+	case modeList, modeImport:
 		if m.filtering {
 			items = []string{
 				keyStyle.Render("Enter") + labelStyle.Render("Apply"),
@@ -46,24 +45,38 @@ func (m Model) viewHelpBar() string {
 			baseItems = append(baseItems,
 				keyStyle.Render("↑↓")+labelStyle.Render("Move"),
 				keyStyle.Render("Space")+labelStyle.Render("Toggle"),
-				keyStyle.Render("+")+labelStyle.Render("Create"),
 			)
 
-			if isDotEnvEntry {
+			// Only show edit/delete/create options in list mode, not import mode
+			if m.mode == modeList {
 				baseItems = append(baseItems,
-					keyStyle.Render("=")+labelStyle.Render("Add&Edit"),
+					keyStyle.Render("+")+labelStyle.Render("Create"),
+				)
+
+				if isDotEnvEntry {
+					baseItems = append(baseItems,
+						keyStyle.Render("=")+labelStyle.Render("Add&Edit"),
+					)
+				} else {
+					baseItems = append(baseItems,
+						keyStyle.Render("=")+labelStyle.Render("Edit"),
+						keyStyle.Render("-")+labelStyle.Render("Delete"),
+					)
+				}
+			}
+
+			if m.mode == modeImport {
+				baseItems = append(baseItems,
+					keyStyle.Render("Enter")+labelStyle.Render("Import"),
+					keyStyle.Render("Esc")+labelStyle.Render("Cancel"),
 				)
 			} else {
 				baseItems = append(baseItems,
-					keyStyle.Render("=")+labelStyle.Render("Edit"),
-					keyStyle.Render("-")+labelStyle.Render("Delete"),
+					keyStyle.Render("i")+labelStyle.Render("Import"),
+					keyStyle.Render("Enter")+labelStyle.Render("Apply"),
+					keyStyle.Render("q")+labelStyle.Render("Cancel"),
 				)
 			}
-
-			baseItems = append(baseItems,
-				keyStyle.Render("Enter")+labelStyle.Render("Apply"),
-				keyStyle.Render("q")+labelStyle.Render("Cancel"),
-			)
 
 			items = baseItems
 		}
@@ -80,6 +93,11 @@ func (m Model) viewHelpBar() string {
 			keyStyle.Render("n/Esc") + labelStyle.Render("No"),
 		}
 	case modeConfirmPromote:
+		items = []string{
+			keyStyle.Render("y/Enter") + labelStyle.Render("Yes"),
+			keyStyle.Render("n/Esc") + labelStyle.Render("No"),
+		}
+	case modeConfirmImport:
 		items = []string{
 			keyStyle.Render("y/Enter") + labelStyle.Render("Yes"),
 			keyStyle.Render("n/Esc") + labelStyle.Render("No"),

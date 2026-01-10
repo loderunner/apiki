@@ -17,7 +17,9 @@ const (
 	modeEdit
 	modeConfirmDelete
 	modeConfirmPromote
+	modeConfirmImport
 	modeError
+	modeImport
 )
 
 // inputField identifies which field is being edited in add/edit mode.
@@ -74,6 +76,9 @@ type Model struct {
 
 	// Viewport state for scrolling list
 	viewportStart int // first visible entry index in list mode
+
+	// Import mode state
+	originalEntries []Entry // stored entries when in import mode
 }
 
 // NewModel creates a new Model with the given entries and file path for
@@ -128,14 +133,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m = m.updateInputWidths()
-		if m.mode == modeList {
+		if m.mode == modeList || m.mode == modeImport {
 			m = m.adjustViewport()
 		}
 		return m, nil
 
 	case tea.KeyMsg:
 		switch m.mode {
-		case modeList:
+		case modeList, modeImport:
 			return m.updateList(msg)
 		case modeAdd, modeEdit:
 			return m.updateForm(msg)
@@ -143,6 +148,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateConfirmDelete(msg)
 		case modeConfirmPromote:
 			return m.updateConfirmPromote(msg)
+		case modeConfirmImport:
+			return m.updateConfirmImport(msg)
 		case modeError:
 			return m.updateError(msg)
 		}
@@ -156,7 +163,7 @@ func (m Model) View() string {
 	var b strings.Builder
 
 	switch m.mode {
-	case modeList:
+	case modeList, modeImport:
 		b.WriteString(m.viewList())
 	case modeAdd:
 		b.WriteString(m.viewForm("Add Entry"))
@@ -166,12 +173,14 @@ func (m Model) View() string {
 		b.WriteString(m.viewConfirmDelete())
 	case modeConfirmPromote:
 		b.WriteString(m.viewConfirmPromote())
+	case modeConfirmImport:
+		b.WriteString(m.viewConfirmImport())
 	case modeError:
 		b.WriteString(m.viewError())
 	}
 
 	// Render bottom line: may contain ▼ chevron and/or filter bar
-	if m.mode == modeList {
+	if m.mode == modeList || m.mode == modeImport {
 		hasFilter := m.filtering || m.filterInput.Value() != ""
 		hasMore := m.hasEntriesBelow()
 

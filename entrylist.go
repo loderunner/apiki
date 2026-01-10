@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -127,7 +128,7 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	// List mode keys
 	switch key {
-	case "ctrl+c", "q":
+	case "q", "ctrl+c":
 		m.cancelled = true
 		return m, tea.Quit
 
@@ -136,10 +137,33 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m = m.clearFilter()
 			return m, nil
 		}
+		if m.mode == modeImport {
+			// Cancel import: restore original entries
+			m.entries = m.originalEntries
+			m.originalEntries = nil
+			m.mode = modeList
+			m = m.recomputeFilter()
+			m = m.adjustViewport()
+			return m, nil
+		}
 		m.cancelled = true
 		return m, tea.Quit
 
 	case "enter":
+		if m.mode == modeImport {
+			// Count selected entries
+			selectedCount := 0
+			for _, entry := range m.entries {
+				if entry.Selected {
+					selectedCount++
+				}
+			}
+			// Only show confirmation if there are selected entries
+			if selectedCount > 0 {
+				m.mode = modeConfirmImport
+			}
+			return m, nil
+		}
 		m.quitting = true
 		return m, tea.Quit
 
@@ -175,6 +199,10 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case "=":
+		// Don't allow editing in import mode
+		if m.mode == modeImport {
+			return m, nil
+		}
 		if len(m.filteredIndices) > 0 {
 			m = m.clearFilter()
 			actualIndex := m.filteredIndices[m.cursor]
@@ -197,8 +225,8 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			currentEntry.Selected = !currentEntry.Selected
 
 			// Radio-button behavior: if we selected this entry, deselect others
-			// with the same name
-			if currentEntry.Selected {
+			// with the same name (only in list mode, not import mode)
+			if currentEntry.Selected && m.mode != modeImport {
 				groups := m.nameGroups()
 				for _, i := range groups[currentEntry.Name] {
 					if i != actualIndex {
@@ -209,11 +237,19 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 
 	case "+":
+		// Don't allow creating new entries in import mode
+		if m.mode == modeImport {
+			return m, nil
+		}
 		m = m.clearFilter()
 		m.mode = modeAdd
 		return m.prepareForm(-1, nil)
 
 	case "backspace", "delete", "-":
+		// Don't allow deletion in import mode
+		if m.mode == modeImport {
+			return m, nil
+		}
 		if len(m.filteredIndices) > 0 {
 			actualIndex := m.filteredIndices[m.cursor]
 			entry := m.entries[actualIndex]
@@ -223,6 +259,23 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 			// Otherwise ignore the keypress for .env entries
 		}
+
+	case "i":
+		if m.mode == modeList {
+			// Store current entries
+			m.originalEntries = make([]Entry, len(m.entries))
+			copy(m.originalEntries, m.entries)
+
+			// Load environment variables
+			envEntries := loadEnvironmentEntries()
+			m.entries = envEntries
+			m.mode = modeImport
+			m.cursor = 0
+			m = m.clearFilter()
+			m = m.recomputeFilter()
+			m = m.adjustViewport()
+		}
+		return m, nil
 	}
 
 	return m, nil
@@ -235,7 +288,11 @@ func (m Model) viewList() string {
 		NewStyle().
 		Bold(true).
 		Foreground(colorBrightBlue)
-	b.WriteString(titleStyle.Render("Environment Variables"))
+	title := "Environment Variables"
+	if m.mode == modeImport {
+		title = "Import from Environment"
+	}
+	b.WriteString(titleStyle.Render(title))
 	b.WriteString("\n")
 
 	dimStyle := lipgloss.NewStyle().Foreground(colorGray)
@@ -243,7 +300,11 @@ func (m Model) viewList() string {
 
 	if len(m.entries) == 0 {
 		b.WriteString("\n")
-		b.WriteString(dimStyle.Render("  No entries. Press + to add one."))
+		if m.mode == modeImport {
+			b.WriteString(dimStyle.Render("  No environment variables to import."))
+		} else {
+			b.WriteString(dimStyle.Render("  No entries. Press + to add one."))
+		}
 		b.WriteString("\n")
 		return b.String()
 	}
@@ -379,4 +440,72 @@ func (m Model) hasEntriesBelow() bool {
 		return false
 	}
 	return m.viewportStart+m.listHeight() < len(m.filteredIndices)
+}
+
+// loadEnvironmentEntries loads environment variables from os.Environ() and
+// converts them to Entry format.
+func loadEnvironmentEntries() []Entry {
+	envVars := os.Environ()
+	entries := make([]Entry, 0, len(envVars))
+
+	for _, envVar := range envVars {
+		parts := strings.SplitN(envVar, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		name := parts[0]
+		value := parts[1]
+
+		entries = append(entries, Entry{
+			Name:     name,
+			Value:    value,
+			Label:    value,
+			Selected: false,
+		})
+	}
+
+	SortEntries(entries)
+	return entries
+}
+
+// confirmImport creates apiki entries for all selected environment variables
+// and restores the original entries list.
+func (m Model) confirmImport() (Model, tea.Cmd) {
+	// Collect selected entries
+	selectedEntries := make([]Entry, 0)
+	for _, entry := range m.entries {
+		if entry.Selected {
+			// Create new apiki entry (no SourceFile)
+			selectedEntries = append(selectedEntries, Entry{
+				Name:     entry.Name,
+				Value:    entry.Value,
+				Label:    "imported from environment",
+				Selected: true,
+			})
+		}
+	}
+
+	// Restore original entries
+	m.entries = m.originalEntries
+	m.originalEntries = nil
+
+	// Add selected entries to the main list
+	if len(selectedEntries) > 0 {
+		m.entries = append(m.entries, selectedEntries...)
+		SortEntries(m.entries)
+		m = m.persistEntries()
+
+		// On persist failure, stay in error mode
+		if m.mode == modeError {
+			return m, nil
+		}
+	}
+
+	// Return to list mode
+	m.mode = modeList
+	m = m.recomputeFilter()
+	m.cursor = 0
+	m = m.adjustViewport()
+
+	return m, nil
 }
