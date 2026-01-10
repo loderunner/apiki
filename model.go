@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // viewMode represents the current mode of the TUI.
@@ -63,6 +64,9 @@ type Model struct {
 	filterInput     textinput.Model
 	filteredIndices []int
 	fuzzyMatches    map[int][]int
+
+	// Viewport state for scrolling list
+	viewportStart int // first visible entry index in list mode
 }
 
 // NewModel creates a new Model with the given entries.
@@ -115,6 +119,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m = m.updateInputWidths()
+		if m.mode == modeList {
+			m = m.adjustViewport()
+		}
 		return m, nil
 
 	case tea.KeyMsg:
@@ -146,9 +153,27 @@ func (m Model) View() string {
 		b.WriteString(m.viewConfirmDelete())
 	}
 
-	b.WriteString("\n")
-	if m.mode == modeList && (m.filtering || m.filterInput.Value() != "") {
-		b.WriteString(m.viewFilterBar())
+	// Render bottom line: may contain ▼ chevron and/or filter bar
+	if m.mode == modeList {
+		hasFilter := m.filtering || m.filterInput.Value() != ""
+		hasMore := m.hasEntriesBelow()
+
+		if hasMore || hasFilter {
+			chevronStyle := lipgloss.NewStyle().Foreground(colorGray)
+			if hasMore {
+				b.WriteString(chevronStyle.Render("▼"))
+				if hasFilter {
+					b.WriteString(" ")
+				}
+			}
+			if hasFilter {
+				b.WriteString(m.viewFilterBar())
+			}
+			b.WriteString("\n")
+		} else {
+			b.WriteString("\n")
+		}
+	} else {
 		b.WriteString("\n")
 	}
 	b.WriteString(m.viewHelpBar())

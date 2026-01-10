@@ -49,6 +49,7 @@ func (m Model) recomputeFilter() Model {
 
 	if len(m.filteredIndices) == 0 {
 		m.cursor = 0
+		m = m.adjustViewport()
 		return m
 	}
 
@@ -56,6 +57,7 @@ func (m Model) recomputeFilter() Model {
 	for displayIdx, actualIdx := range m.filteredIndices {
 		if actualIdx == targetEntryIdx {
 			m.cursor = displayIdx
+			m = m.adjustViewport()
 			return m
 		}
 	}
@@ -66,6 +68,7 @@ func (m Model) recomputeFilter() Model {
 		for displayIdx, actualIdx := range m.filteredIndices {
 			if actualIdx == entryIdx {
 				m.cursor = displayIdx
+				m = m.adjustViewport()
 				return m
 			}
 		}
@@ -73,6 +76,7 @@ func (m Model) recomputeFilter() Model {
 
 	// No earlier entry found, default to first entry
 	m.cursor = 0
+	m = m.adjustViewport()
 	return m
 }
 

@@ -62,6 +62,45 @@ func (m Model) nameGroups() map[string][]int {
 	return m.nameGroupsMemo
 }
 
+// listHeight calculates how many entries can fit in the visible area.
+func (m Model) listHeight() int {
+	// Fixed overhead: title(1) + top spacer(1) + bottom line(1) + helpbar(1)
+	// The bottom line contains ▼ chevron and/or filter bar (they share the line)
+	overhead := 4
+	visible := m.height - overhead
+	if visible < 1 {
+		return 1
+	}
+	return visible
+}
+
+// adjustViewport ensures the cursor stays within the visible viewport.
+// The viewport only scrolls when the cursor would move outside the visible
+// range.
+func (m Model) adjustViewport() Model {
+	if len(m.filteredIndices) == 0 {
+		m.viewportStart = 0
+		return m
+	}
+	visible := m.listHeight()
+	// Cursor above viewport: scroll up
+	if m.cursor < m.viewportStart {
+		m.viewportStart = m.cursor
+	}
+	// Cursor below viewport: scroll down
+	if m.cursor >= m.viewportStart+visible {
+		m.viewportStart = m.cursor - visible + 1
+	}
+	// Clamp viewport start
+	maxStart := max(len(m.filteredIndices)-visible, 0)
+	if m.viewportStart < 0 {
+		m.viewportStart = 0
+	} else if m.viewportStart > maxStart {
+		m.viewportStart = maxStart
+	}
+	return m
+}
+
 func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
@@ -120,6 +159,7 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		} else {
 			m.cursor = len(m.filteredIndices) - 1
 		}
+		m = m.adjustViewport()
 		return m, nil
 
 	case "down", "j":
@@ -131,6 +171,7 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		} else {
 			m.cursor = 0
 		}
+		m = m.adjustViewport()
 		return m, nil
 
 	case "=":
@@ -201,10 +242,13 @@ func (m Model) viewList() string {
 		Bold(true).
 		Foreground(colorBrightBlue)
 	b.WriteString(titleStyle.Render("Environment Variables"))
-	b.WriteString("\n\n")
+	b.WriteString("\n")
 
 	dimStyle := lipgloss.NewStyle().Foreground(colorGray)
+	chevronStyle := lipgloss.NewStyle().Foreground(colorGray)
+
 	if len(m.entries) == 0 {
+		b.WriteString("\n")
 		b.WriteString(dimStyle.Render("  No entries. Press + to add one."))
 		b.WriteString("\n")
 		return b.String()
@@ -229,12 +273,30 @@ func (m Model) viewList() string {
 
 	entriesToShow := m.filteredIndices
 	if len(entriesToShow) == 0 {
+		b.WriteString("\n")
 		b.WriteString(dimStyle.Render("  No entries match the filter."))
 		b.WriteString("\n")
 		return b.String()
 	}
 
-	for displayIdx, actualIdx := range entriesToShow {
+	// Show ▲ chevron if there are entries above the viewport
+	if m.viewportStart > 0 {
+		b.WriteString(chevronStyle.Render("▲"))
+		b.WriteString("\n")
+	} else {
+		b.WriteString("\n")
+	}
+
+	// Calculate visible range
+	visibleHeight := m.listHeight()
+	viewportEnd := m.viewportStart + visibleHeight
+	if viewportEnd > len(entriesToShow) {
+		viewportEnd = len(entriesToShow)
+	}
+
+	// Render only visible entries
+	for displayIdx := m.viewportStart; displayIdx < viewportEnd; displayIdx++ {
+		actualIdx := entriesToShow[displayIdx]
 		entry := m.entries[actualIdx]
 		cursor := "  "
 		if displayIdx == m.cursor {
@@ -305,4 +367,12 @@ func (m Model) viewList() string {
 	}
 
 	return b.String()
+}
+
+// hasEntriesBelow returns true if there are entries below the viewport.
+func (m Model) hasEntriesBelow() bool {
+	if len(m.filteredIndices) == 0 {
+		return false
+	}
+	return m.viewportStart+m.listHeight() < len(m.filteredIndices)
 }
