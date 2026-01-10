@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,7 +19,18 @@ func (m Model) updateConfirmDelete(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if len(m.filteredIndices) > 0 && m.cursor < len(m.filteredIndices) {
 			actualIndex := m.filteredIndices[m.cursor]
 			if actualIndex < len(m.entries) {
+				// Save original entries for recovery on persist failure
+				originalEntries := slices.Clone(m.entries)
+
 				m.entries = append(m.entries[:actualIndex], m.entries[actualIndex+1:]...)
+				m = m.persistEntries()
+
+				// On persist failure, restore original entries and stay in error mode
+				if m.mode == modeError {
+					m.entries = originalEntries
+					return m, nil
+				}
+
 				m = m.recomputeFilter()
 				if m.cursor >= len(m.filteredIndices) && m.cursor > 0 {
 					m.cursor--

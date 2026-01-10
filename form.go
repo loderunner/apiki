@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -128,6 +129,9 @@ func (m Model) saveFormEntry() (tea.Model, tea.Cmd) {
 		Selected: false,
 	}
 
+	// Save original entries for recovery on persist failure
+	originalEntries := slices.Clone(m.entries)
+
 	if m.editIndex >= 0 {
 		if m.editIndex < len(m.entries) {
 			// Preserve selection state when editing
@@ -139,6 +143,14 @@ func (m Model) saveFormEntry() (tea.Model, tea.Cmd) {
 	}
 
 	SortEntries(m.entries)
+	m = m.persistEntries()
+
+	// On persist failure, restore original entries and stay in error mode
+	if m.mode == modeError {
+		m.entries = originalEntries
+		return m, nil
+	}
+
 	m = m.clearFilter()
 
 	// Move cursor to the saved entry's new position

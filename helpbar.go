@@ -61,6 +61,11 @@ func (m Model) viewHelpBar() string {
 			keyStyle.Render("y/Enter") + labelStyle.Render("Yes"),
 			keyStyle.Render("n/Esc") + labelStyle.Render("No"),
 		}
+	case modeError:
+		items = []string{
+			keyStyle.Render("Enter") + labelStyle.Render("Continue"),
+			keyStyle.Render("q") + labelStyle.Render("Quit"),
+		}
 	}
 
 	return strings.Join(items, "")

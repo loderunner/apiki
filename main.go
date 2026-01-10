@@ -43,7 +43,7 @@ func run() (string, error) {
 	}
 	defer func() { _ = tty.Close() }()
 
-	model := NewModel(entries)
+	model := NewModel(entries, entriesPath)
 	p := tea.NewProgram(model, tea.WithInput(tty), tea.WithOutput(tty))
 
 	finalModel, err := p.Run()

@@ -16,6 +16,7 @@ const (
 	modeAdd
 	modeEdit
 	modeConfirmDelete
+	modeError
 )
 
 // inputField identifies which field is being edited in add/edit mode.
@@ -29,9 +30,11 @@ const (
 
 // Model is the bubbletea model for the apiki TUI.
 type Model struct {
-	entries      []Entry
-	cursor       int
-	mode         viewMode
+	entries     []Entry
+	entriesPath string
+	cursor      int
+	mode        viewMode
+
 	currentField inputField
 
 	// Text inputs for add/edit mode
@@ -56,6 +59,9 @@ type Model struct {
 	nameError  string
 	valueError string
 
+	// errorMessage stores an error message to display in error mode
+	errorMessage string
+
 	// nameGroupsMemo memoizes the name groups for faster lookup
 	nameGroupsMemo map[string][]int
 
@@ -69,8 +75,9 @@ type Model struct {
 	viewportStart int // first visible entry index in list mode
 }
 
-// NewModel creates a new Model with the given entries.
-func NewModel(entries []Entry) Model {
+// NewModel creates a new Model with the given entries and file path for
+// persistence.
+func NewModel(entries []Entry, entriesPath string) Model {
 	nameInput := textinput.New()
 	nameInput.Placeholder = "VAR_NAME"
 	nameInput.CharLimit = 256
@@ -91,6 +98,7 @@ func NewModel(entries []Entry) Model {
 
 	model := Model{
 		entries:         entries,
+		entriesPath:     entriesPath,
 		cursor:          0,
 		mode:            modeList,
 		nameInput:       nameInput,
@@ -132,6 +140,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateForm(msg)
 		case modeConfirmDelete:
 			return m.updateConfirmDelete(msg)
+		case modeError:
+			return m.updateError(msg)
 		}
 	}
 
@@ -151,6 +161,8 @@ func (m Model) View() string {
 		b.WriteString(m.viewForm("Edit Entry"))
 	case modeConfirmDelete:
 		b.WriteString(m.viewConfirmDelete())
+	case modeError:
+		b.WriteString(m.viewError())
 	}
 
 	// Render bottom line: may contain ▼ chevron and/or filter bar
@@ -221,4 +233,14 @@ func (m Model) Cancelled() bool {
 // Entries returns the current entries (potentially modified).
 func (m Model) Entries() []Entry {
 	return m.entries
+}
+
+// persistEntries saves the current entries to the configured file path.
+// On error, switches to error mode to display the message.
+func (m Model) persistEntries() Model {
+	if err := SaveEntries(m.entriesPath, m.entries); err != nil {
+		m.errorMessage = "Failed to save entries: " + err.Error()
+		m.mode = modeError
+	}
+	return m
 }
