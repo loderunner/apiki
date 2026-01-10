@@ -94,39 +94,3 @@ func SaveEntries(path string, entries []Entry) error {
 
 	return os.WriteFile(path, data, 0o644)
 }
-
-// SyncWithEnvironment updates the Selected state of each entry based on
-// whether the environment variable is currently set.
-//
-// An entry is marked as Selected if both its Name and Value match the current
-// environment. For entries with duplicate names (radio groups), only the entry
-// whose value matches the environment is selected. If no exact match is found,
-// no entry with that name is selected.
-func SyncWithEnvironment(entries []Entry) {
-	// Track which names we've already selected (for radio-group behavior)
-	selectedNames := make(map[string]struct{})
-
-	for i := range entries {
-		name := entries[i].Name
-		envVal := os.Getenv(name)
-
-		if envVal == "" {
-			entries[i].Selected = false
-			continue
-		}
-
-		// If we already selected an entry for this name, skip
-		if _, ok := selectedNames[name]; ok {
-			entries[i].Selected = false
-			continue
-		}
-
-		// Select only if both name and value match the environment
-		if entries[i].Value == envVal {
-			entries[i].Selected = true
-			selectedNames[name] = struct{}{}
-		} else {
-			entries[i].Selected = false
-		}
-	}
-}

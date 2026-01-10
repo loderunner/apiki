@@ -30,14 +30,11 @@ func run() (string, error) {
 		return "", fmt.Errorf("could not load entries: %w", err)
 	}
 
-	// Sync selection state with current environment
-	SyncWithEnvironment(entries)
+	// Capture the environment state for all entry names at startup
+	envSnapshot := captureEnvironment(entries)
 
-	// Capture which variables were originally set in the environment
-	originallySet := make(map[string]bool)
-	for _, entry := range entries {
-		originallySet[entry.Name] = entry.Selected
-	}
+	// Sync selection state with captured environment
+	syncWithEnvironment(entries, envSnapshot)
 
 	// Open TTY for TUI input/output, keeping stdout clean for shell commands
 	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
@@ -77,20 +74,72 @@ func run() (string, error) {
 		}
 
 		// Output export/unset commands to stdout
-		output := generateShellCommands(m.Entries(), originallySet)
+		output := generateShellCommands(m.Entries(), envSnapshot)
 		return output, nil
 	}
 
 	return "", nil
 }
 
+// captureEnvironment builds a snapshot of environment variable values for all
+// entry names. Returns a map of name -> value (empty string if not set).
+func captureEnvironment(entries []Entry) map[string]string {
+	env := make(map[string]string)
+	for _, entry := range entries {
+		if _, ok := env[entry.Name]; !ok {
+			env[entry.Name] = os.Getenv(entry.Name)
+		}
+	}
+	return env
+}
+
+// syncWithEnvironment updates the Selected state of each entry based on the
+// captured environment snapshot.
+//
+// An entry is marked as Selected if both its Name and Value match the
+// environment. For entries with duplicate names (radio groups), only the entry
+// whose value matches the environment is selected. If no exact match is found,
+// no entry with that name is selected.
+func syncWithEnvironment(entries []Entry, env map[string]string) {
+	selectedNames := make(map[string]struct{})
+
+	for i := range entries {
+		name := entries[i].Name
+		envVal := env[name]
+
+		if envVal == "" {
+			entries[i].Selected = false
+			continue
+		}
+
+		// If we already selected an entry for this name, skip
+		if _, ok := selectedNames[name]; ok {
+			entries[i].Selected = false
+			continue
+		}
+
+		// Select only if both name and value match the environment
+		if entries[i].Value == envVal {
+			entries[i].Selected = true
+			selectedNames[name] = struct{}{}
+		} else {
+			entries[i].Selected = false
+		}
+	}
+}
+
 // generateShellCommands produces export and unset statements for the given
-// entries. Selected entries get exported. Only entries that were originally
-// set in the environment get unset when deselected.
-func generateShellCommands(
-	entries []Entry,
-	originallySet map[string]bool,
-) string {
+// entries. Only outputs commands when the value has actually changed from the
+// original environment state.
+func generateShellCommands(entries []Entry, env map[string]string) string {
+	// Build a map of name -> selected entry (if any) for radio-group handling
+	selectedByName := make(map[string]*Entry)
+	for i := range entries {
+		if entries[i].Selected {
+			selectedByName[entries[i].Name] = &entries[i]
+		}
+	}
+
 	commands := make([]string, 0, len(entries))
 	handledNames := make(map[string]struct{})
 
@@ -100,15 +149,19 @@ func generateShellCommands(
 		}
 		handledNames[entry.Name] = struct{}{}
 
-		if entry.Selected {
-			// Escape single quotes in value: replace ' with '\''
-			escaped := strings.ReplaceAll(entry.Value, "'", "'\\''")
-			commands = append(
-				commands,
-				fmt.Sprintf("export %s='%s'", entry.Name, escaped),
-			)
-		} else if originallySet[entry.Name] {
-			// Only unset variables that were originally set
+		originalValue := env[entry.Name]
+
+		if selected, ok := selectedByName[entry.Name]; ok {
+			// Only export if the value differs from the original
+			if selected.Value != originalValue {
+				escaped := strings.ReplaceAll(selected.Value, "'", "'\\''")
+				commands = append(
+					commands,
+					fmt.Sprintf("export %s='%s'", selected.Name, escaped),
+				)
+			}
+		} else if originalValue != "" {
+			// No entry with this name is selected, unset if it was originally set
 			commands = append(commands, fmt.Sprintf("unset %s", entry.Name))
 		}
 	}
