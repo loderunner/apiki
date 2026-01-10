@@ -53,6 +53,7 @@ func (m Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.labelInput, cmd = m.labelInput.Update(msg)
 	}
 
+	m = m.updateInputWidths()
 	return m, cmd
 }
 
