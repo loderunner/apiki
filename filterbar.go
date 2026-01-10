@@ -5,27 +5,18 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/sahilm/fuzzy"
 )
 
-// fuzzyMatch checks if query matches entry using sparse case-insensitive
-// matching. The query characters must appear in order within "name label".
-func fuzzyMatch(entry Entry, query string) bool {
-	if query == "" {
-		return true
-	}
+// entrySource implements fuzzy.Source for []Entry.
+type entrySource []Entry
 
-	target := entry.Name + entry.Label
-	targetLower := strings.ToLower(target)
-	queryLower := strings.ToLower(query)
+func (s entrySource) Len() int {
+	return len(s)
+}
 
-	queryIdx := 0
-	for i := 0; i < len(targetLower) && queryIdx < len(queryLower); i++ {
-		if targetLower[i] == queryLower[queryIdx] {
-			queryIdx++
-		}
-	}
-
-	return queryIdx == len(queryLower)
+func (s entrySource) String(i int) string {
+	return s[i].Name + " " + s[i].Label
 }
 
 // recomputeFilter updates filteredIndices based on the current filter query.
@@ -45,12 +36,14 @@ func (m Model) recomputeFilter() Model {
 		for i := range m.entries {
 			m.filteredIndices[i] = i
 		}
+		m.fuzzyMatches = nil
 	} else {
-		m.filteredIndices = m.filteredIndices[:0]
-		for i, entry := range m.entries {
-			if fuzzyMatch(entry, query) {
-				m.filteredIndices = append(m.filteredIndices, i)
-			}
+		matches := fuzzy.FindFrom(query, entrySource(m.entries))
+		m.filteredIndices = make([]int, len(matches))
+		m.fuzzyMatches = make(map[int][]int)
+		for i, match := range matches {
+			m.filteredIndices[i] = match.Index
+			m.fuzzyMatches[match.Index] = match.MatchedIndexes
 		}
 	}
 

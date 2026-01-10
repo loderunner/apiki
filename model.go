@@ -62,6 +62,7 @@ type Model struct {
 	filtering       bool
 	filterInput     textinput.Model
 	filteredIndices []int
+	fuzzyMatches    map[int][]int
 }
 
 // NewModel creates a new Model with the given entries.

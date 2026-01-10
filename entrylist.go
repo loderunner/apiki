@@ -9,36 +9,24 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// highlightMatches finds matching positions in the target string and
-// highlights matching characters in the text portion. The offset parameter
-// indicates the starting position of text within the target string used for
-// fuzzy matching.
+// highlightMatches highlights matching characters in the text portion using
+// precomputed match positions from fuzzyMatches. The offset parameter indicates
+// the starting position of text within the target string used for fuzzy
+// matching.
 func highlightMatches(
-	target string,
+	matchedIndexes []int,
 	text string,
-	query string,
 	offset int,
 	baseStyle lipgloss.Style,
 ) string {
-	if query == "" {
+	if len(matchedIndexes) == 0 {
 		return baseStyle.Render(text)
 	}
 
-	// Find match positions in target
-	targetLower := strings.ToLower(target)
-	queryLower := strings.ToLower(query)
+	// Convert matched indexes to a map for fast lookup
 	matchPositions := make(map[int]bool)
-
-	queryIdx := 0
-	for i := 0; i < len(targetLower) && queryIdx < len(queryLower); i++ {
-		if targetLower[i] == queryLower[queryIdx] {
-			matchPositions[i] = true
-			queryIdx++
-		}
-	}
-
-	if len(matchPositions) == 0 {
-		return baseStyle.Render(text)
+	for _, idx := range matchedIndexes {
+		matchPositions[idx] = true
 	}
 
 	// Highlight matching characters in text
@@ -292,18 +280,16 @@ func (m Model) viewList() string {
 		var name string
 		var label string
 
-		query := strings.TrimSpace(m.filterInput.Value())
-		if query != "" {
-			// Find match positions and highlight in combined "name label" string
-			target := entry.Name + entry.Label
-			name = highlightMatches(target, entry.Name, query, 0, nameStyle)
+		matchedIndexes := m.fuzzyMatches[actualIdx]
+		if len(matchedIndexes) > 0 {
+			// Highlight matches using precomputed positions
+			name = highlightMatches(matchedIndexes, entry.Name, 0, nameStyle)
 			// Highlight matches in label
 			if entry.Label != "" {
-				labelOffset := len(entry.Name)
+				labelOffset := len(entry.Name) + 1
 				label = " " + highlightMatches(
-					target,
+					matchedIndexes,
 					entry.Label,
-					query,
 					labelOffset,
 					labelStyle,
 				)
