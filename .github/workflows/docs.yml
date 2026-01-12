@@ -2,11 +2,8 @@ name: Build and Deploy Documentation
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - '.github/workflows/docs.yml'
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
