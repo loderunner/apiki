@@ -1,4 +1,4 @@
-name: golangci-lint
+name: lint
 
 on:
   push:
@@ -6,6 +6,10 @@ on:
       - main
       - master
   pull_request: {}
+
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   golangci-lint:
@@ -21,3 +25,10 @@ jobs:
         with:
           version: latest
           args: --timeout=5m
+  lint-pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
