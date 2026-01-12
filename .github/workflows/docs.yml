@@ -33,7 +33,7 @@ jobs:
           go-version: '1.25.5'
 
       - name: Install Hugo Extended
-        uses: peaceiris/actions-hugo@v2
+        uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: 'latest'
           extended: true
