@@ -1,0 +1,11 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "skip-github-release": true,
+      "extra-files": [
+        "VERSION:plain"
+      ]
+    }
+  }
+}
