@@ -1,0 +1,6 @@
+{
+  "go.buildTags": "acceptance",
+  "[go]": {
+    "editor.tabSize": 4
+  }
+}
