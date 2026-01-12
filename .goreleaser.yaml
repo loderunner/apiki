@@ -1,0 +1,46 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+    hooks:
+      post:
+        - sh -c 'test -f dist/install.sh || sed "s/__VERSION__/{{ .Version }}/g" scripts/install.sh.tmpl > dist/install.sh'
+
+archives:
+  - formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - src: scripts/init.bash
+        dst: init.bash
+      - src: scripts/init.zsh
+        dst: init.zsh
+      - src: scripts/init.fish
+        dst: init.fish
+
+checksum:
+  algorithm: sha256
+
+release:
+  github:
+    owner: loderunner
+    name: apiki
+  extra_files:
+    - glob: dist/install.sh

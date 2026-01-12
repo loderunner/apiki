@@ -1,0 +1,223 @@
+{ # this ensures the entire script is downloaded #
+
+apiki_has() {
+  type "$1" > /dev/null 2>&1
+}
+
+apiki_echo() {
+  printf '%s\n' "$*" 2>/dev/null
+}
+
+apiki_default_install_dir() {
+  if [ -z "${XDG_DATA_HOME-}" ]; then
+    printf '%s' "${HOME}/.local/share/apiki"
+  else
+    printf '%s' "${XDG_DATA_HOME}/apiki"
+  fi
+}
+
+apiki_install_dir() {
+  if [ -n "$APIKI_DIR" ]; then
+    printf '%s' "${APIKI_DIR}"
+  else
+    apiki_default_install_dir
+  fi
+}
+
+apiki_latest_version() {
+  apiki_echo "v__VERSION__"
+}
+
+apiki_download() {
+  url="$1"
+  output="$2"
+  if apiki_has "curl"; then
+    curl --fail --silent --location -o "${output}" "${url}"
+  elif apiki_has "wget"; then
+    wget --quiet -O "${output}" "${url}"
+  else
+    apiki_echo >&2 "Error: curl or wget is required to download files."
+    return 1
+  fi
+}
+
+apiki_detect_os() {
+  os="$(uname -s)"
+  case "${os}" in
+    Linux*)
+      apiki_echo "linux"
+    ;;
+    Darwin*)
+      apiki_echo "darwin"
+    ;;
+    *)
+      apiki_echo >&2 "Unsupported OS: ${os}"
+      exit 1
+    ;;
+  esac
+}
+
+apiki_detect_arch() {
+  arch="$(uname -m)"
+  case "${arch}" in
+    x86_64)
+      apiki_echo "amd64"
+    ;;
+    arm64 | aarch64)
+      apiki_echo "arm64"
+    ;;
+    *)
+      apiki_echo >&2 "Unsupported architecture: ${arch}"
+      exit 1
+    ;;
+  esac
+}
+
+# Find all existing shell profile files and their types.
+# Output format: one line per profile, "path:type" where type is bash, zsh, or fish.
+apiki_find_profiles() {
+  # bash profiles
+  [ -f "${HOME}/.bashrc" ] && apiki_echo "${HOME}/.bashrc:bash"
+  [ -f "${HOME}/.bash_profile" ] && apiki_echo "${HOME}/.bash_profile:bash"
+  # zsh profiles
+  [ -f "${HOME}/.zshrc" ] && apiki_echo "${HOME}/.zshrc:zsh"
+  [ -f "${HOME}/.zprofile" ] && apiki_echo "${HOME}/.zprofile:zsh"
+  # generic profile (use bash init)
+  [ -f "${HOME}/.profile" ] && apiki_echo "${HOME}/.profile:bash"
+  # fish
+  [ -f "${HOME}/.config/fish/config.fish" ] && apiki_echo "${HOME}/.config/fish/config.fish:fish"
+  return 0
+}
+
+apiki_do_install() {
+  # Resolve install parameters: directory, version, platform, and URLs
+  install_dir="$(apiki_install_dir)"
+  version="${APIKI_VERSION:-$(apiki_latest_version)}"
+  os="$(apiki_detect_os)"
+  arch="$(apiki_detect_arch)"
+  archive_name="apiki_${version#v}_${os}_${arch}.tar.gz"
+  github_repo="${APIKI_INSTALL_GITHUB_REPO:-loderunner/apiki}"
+  base_url="${APIKI_INSTALL_BASE_URL:-https://github.com/${github_repo}/releases/download/${version}}"
+  github_url="${base_url}/${archive_name}"
+  checksums_url="${base_url}/apiki_${version#v}_checksums.txt"
+
+  # Validate and create install directory
+  if [ -e "${install_dir}" ] && [ ! -d "${install_dir}" ]; then
+    apiki_echo >&2 "File \"${install_dir}\" has the same name as installation directory."
+    exit 1
+  fi
+
+  if [ "${install_dir}" = "$(apiki_default_install_dir)" ]; then
+    mkdir -p "${install_dir}"
+  else
+    if [ ! -d "${install_dir}" ]; then
+      apiki_echo >&2 "You have \$APIKI_DIR set to \"${install_dir}\", but that directory does not exist."
+      exit 1
+    fi
+  fi
+
+  # Download the release archive
+  apiki_echo "=> Downloading apiki ${version} for ${os}_${arch}..."
+  tmp_dir="$(mktemp -d)"
+  archive_path="${tmp_dir}/${archive_name}"
+  checksums_path="${tmp_dir}/checksums.txt"
+
+  if ! apiki_download "${github_url}" "${archive_path}"; then
+    apiki_echo >&2 "Failed to download apiki from ${github_url}"
+    rm -rf "${tmp_dir}"
+    exit 1
+  fi
+
+  # Verify checksum (optional but recommended)
+  apiki_echo "=> Verifying checksum..."
+  if ! apiki_download "${checksums_url}" "${checksums_path}"; then
+    apiki_echo >&2 "Warning: Failed to download checksums. Skipping verification."
+  else
+    expected_checksum="$(grep "${archive_name}" "${checksums_path}" | awk '{print $1}')"
+    if [ -n "${expected_checksum}" ]; then
+      actual_checksum=""
+      if apiki_has "sha256sum"; then
+        actual_checksum="$(sha256sum "${archive_path}" | awk '{print $1}')"
+      elif apiki_has "shasum"; then
+        actual_checksum="$(shasum -a 256 "${archive_path}" | awk '{print $1}')"
+      elif apiki_has "openssl"; then
+        actual_checksum="$(openssl sha256 "${archive_path}" | awk '{print $2}')"
+      else
+        apiki_echo >&2 "Warning: No sha256sum, shasum, or openssl found. Skipping checksum verification."
+        expected_checksum=""
+      fi
+
+      if [ -n "${expected_checksum}" ] && [ "${expected_checksum}" != "${actual_checksum}" ]; then
+        apiki_echo >&2 "Error: Checksum verification failed!"
+        apiki_echo >&2 "Expected: ${expected_checksum}"
+        apiki_echo >&2 "Actual:   ${actual_checksum}"
+        rm -rf "${tmp_dir}"
+        exit 1
+      fi
+    fi
+  fi
+
+  # Extract archive to install directory
+  apiki_echo "=> Extracting to ${install_dir}..."
+  if ! tar -xzf "${archive_path}" -C "${install_dir}"; then
+    apiki_echo >&2 "Failed to extract archive"
+    rm -rf "${tmp_dir}"
+    exit 1
+  fi
+
+  chmod +x "${install_dir}/apiki"
+
+  # Clean up temp directory
+  rm -rf "${tmp_dir}"
+
+  apiki_echo
+
+  # Find all shell profiles and update them
+  profile_install_dir="$(apiki_install_dir | sed "s:^$HOME:\$HOME:")"
+  profiles="$(apiki_find_profiles)"
+  updated_profiles=""
+
+  if [ -z "${profiles}" ]; then
+    apiki_echo "=> No shell profile found. Tried ~/.bashrc, ~/.bash_profile, ~/.zprofile, ~/.zshrc, ~/.profile, and ~/.config/fish/config.fish."
+    apiki_echo "=> Create one of them and run this script again"
+    apiki_echo "   OR"
+    apiki_echo "=> Append the following lines to the correct file yourself:"
+    apiki_echo
+    printf '    export APIKI_DIR="%s"\n' "${profile_install_dir}"
+    printf '    [ -s "$APIKI_DIR/init.bash" ] && . "$APIKI_DIR/init.bash"\n'
+  else
+    # Update each profile file
+    echo "${profiles}" | while IFS=: read -r profile_path shell_type; do
+      [ -z "${profile_path}" ] && continue
+
+      # Determine init script based on shell type
+      case "${shell_type}" in
+        fish) init_script="init.fish" ;;
+        zsh)  init_script="init.zsh" ;;
+        *)    init_script="init.bash" ;;
+      esac
+
+      # Build the source string
+      if [ "${shell_type}" = "fish" ]; then
+        source_str="\nset -gx APIKI_DIR \"${profile_install_dir}\"\nsource \"\$APIKI_DIR/${init_script}\"  # This loads apiki\n"
+      else
+        source_str="\nexport APIKI_DIR=\"${profile_install_dir}\"\n[ -s \"\$APIKI_DIR/${init_script}\" ] && . \"\$APIKI_DIR/${init_script}\"  # This loads apiki\n"
+      fi
+
+      # Inject source line into profile (idempotent)
+      if ! grep -q '/apiki' "${profile_path}" 2>/dev/null; then
+        apiki_echo "=> Appending apiki source string to ${profile_path}"
+        printf '%b' "${source_str}" >> "${profile_path}"
+      else
+        apiki_echo "=> apiki source string already in ${profile_path}"
+      fi
+    done
+  fi
+
+  apiki_echo
+  apiki_echo "=> Close and reopen your terminal to start using apiki."
+}
+
+apiki_do_install
+
+} # this ensures the entire script is downloaded #

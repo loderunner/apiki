@@ -1,37 +1,82 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/cobra"
 )
 
+//go:embed VERSION
+var version string
+
+// variablesFile holds the value of the --variables-file flag.
+var variablesFile string
+
 func main() {
-	output, err := run()
-	if err != nil {
+	rootCmd := &cobra.Command{
+		Use:   "apiki",
+		Short: "Environment variable manager",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			variablesPath, err := resolveVariablesFile(cmd)
+			if err != nil {
+				return fmt.Errorf("could not resolve variables file: %w", err)
+			}
+			output, err := run(variablesPath)
+			if err != nil {
+				return err
+			}
+			if output != "" {
+				fmt.Printf("%s\n", output)
+			}
+			return nil
+		},
+	}
+
+	// Persistent flag available to root and all subcommands
+	rootCmd.PersistentFlags().StringVarP(
+		&variablesFile,
+		"variables-file", "f",
+		"",
+		"path to variables file (env: APIKI_VARIABLES_FILE)",
+	)
+
+	// Redirect all Cobra output to stderr to avoid breaking eval
+	rootCmd.SetOut(os.Stderr)
+	rootCmd.SetErr(os.Stderr)
+
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Fprintf(os.Stderr, "apiki %s\n", strings.TrimSpace(version))
+		},
+	}
+
+	rootCmd.AddCommand(versionCmd)
+
+	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	if output != "" {
-		fmt.Printf("%s\n", output)
-	}
 }
 
-// resolveEntriesPath determines the entries file path using the following
+// resolveVariablesFile determines the variables file path using the following
 // priority:
-// 1. CLI argument (first positional arg)
-// 2. APIKI_ENTRIES_PATH environment variable
-// 3. Default path (~/.apiki/variables.json)
-func resolveEntriesPath() (string, error) {
-	// 1. Check CLI argument
-	if len(os.Args) > 1 {
-		return os.Args[1], nil
+//  1. --variables-file flag (if explicitly set)
+//  2. APIKI_VARIABLES_FILE environment variable
+//  3. Default path (~/.apiki/variables.json)
+func resolveVariablesFile(cmd *cobra.Command) (string, error) {
+	// 1. Check if flag was explicitly set
+	if cmd.Flags().Changed("variables-file") {
+		return variablesFile, nil
 	}
 
 	// 2. Check environment variable
-	if envPath := os.Getenv("APIKI_ENTRIES_PATH"); envPath != "" {
+	if envPath := os.Getenv("APIKI_VARIABLES_FILE"); envPath != "" {
 		return envPath, nil
 	}
 
@@ -39,12 +84,7 @@ func resolveEntriesPath() (string, error) {
 	return DefaultEntriesPath()
 }
 
-func run() (string, error) {
-	entriesPath, err := resolveEntriesPath()
-	if err != nil {
-		return "", fmt.Errorf("could not get entries path: %w", err)
-	}
-
+func run(entriesPath string) (string, error) {
 	apikiEntries, err := LoadEntries(entriesPath)
 	if err != nil {
 		return "", fmt.Errorf("could not load entries: %w", err)
