@@ -1,0 +1,22 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    wget \
+    bash \
+    tar \
+    gzip \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get purge -y curl || true
+
+WORKDIR /home/testuser
+RUN useradd -m -s /bin/bash testuser && \
+    touch /home/testuser/.bashrc && \
+    chown -R testuser:testuser /home/testuser
+
+ENV SHELL=/bin/bash
+
+USER testuser
+
+CMD ["sleep", "infinity"]

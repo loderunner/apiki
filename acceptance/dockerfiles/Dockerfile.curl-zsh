@@ -1,0 +1,21 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    zsh \
+    tar \
+    gzip \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /home/testuser
+RUN useradd -m -s /bin/zsh testuser && \
+    touch /home/testuser/.zshrc && \
+    chown -R testuser:testuser /home/testuser
+
+ENV SHELL=/bin/zsh
+
+USER testuser
+
+CMD ["sleep", "infinity"]
