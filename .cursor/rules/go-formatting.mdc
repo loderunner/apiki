@@ -10,13 +10,13 @@ before attempting manual edits.
 
 ## Command
 
-```bash
+```shell
 go tool golangci-lint fmt ./...
 ```
 
 Or for a specific file:
 
-```bash
+```shell
 go tool golangci-lint fmt path/to/file.go
 ```
 

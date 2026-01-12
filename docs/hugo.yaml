@@ -1,0 +1,51 @@
+baseURL: 'https://loderunner.github.io/apiki/'
+title: 'apiki'
+enableGitInfo: true
+enableRobotsTXT: true
+enableEmoji: true
+
+module:
+  imports:
+    - path: 'github.com/imfing/hextra'
+
+params:
+  description: 'Terminal-based environment variable manager'
+  theme:
+    default: 'system'
+    displayToggle: true
+  navbar:
+    displayTitle: true
+    displayLogo: false
+    socialLinks:
+      github: 'https://github.com/loderunner/apiki'
+  page:
+    width: 'normal'
+  footer:
+    displayPoweredBy: true
+    displayCopyright: true
+  editURL:
+    enable: true
+    base: 'https://github.com/loderunner/apiki/edit/main/docs/content'
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+menu:
+  main:
+    - name: "Documentation"
+      pageRef: "/docs"
+      weight: 1
+    - name: "Getting Started"
+      pageRef: "/docs/getting-started"
+      weight: 2
+    - name: Search
+      weight: 6
+      params:
+        type: search
+    - name: GitHub
+      weight: 7
+      url: "https://github.com/loderunner/apiki"
+      params:
+        icon: github

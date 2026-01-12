@@ -1,2 +1,5 @@
-apiki
+# go build artifact
+/apiki
+
+# GoReleaser build directory
 dist/
