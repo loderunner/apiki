@@ -3,8 +3,6 @@ title: "Installation"
 weight: 11
 ---
 
-# Installation
-
 apiki can be installed using the official installation script or by downloading pre-built binaries from GitHub releases.
 
 ## Quick Install
@@ -12,7 +10,7 @@ apiki can be installed using the official installation script or by downloading 
 The easiest way to install apiki is using the installation script:
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/loderunner/apiki/main/scripts/install.sh | sh
+curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.sh | sh
 ```
 
 This script will:
@@ -90,23 +88,11 @@ You can install apiki to a custom directory by setting the `APIKI_DIR` environme
 
 ```shell
 export APIKI_DIR="$HOME/custom/path"
-curl -fsSL https://raw.githubusercontent.com/loderunner/apiki/main/scripts/install.sh | bash
+curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.sh | bash
 ```
 
 Or download and extract manually, then set `APIKI_DIR` in your shell configuration.
 
-## Verify Installation
+## Verifying
 
-After installation, verify that apiki is working:
-
-```shell
-apiki version
-```
-
-You should see the version number printed. If you see a "command not found" error, make sure:
-1. The binary is in a directory in your PATH, or
-2. Your shell configuration has been sourced (restart your terminal)
-
-## Next Steps
-
-Once installed, head to the [Quick Start](/docs/getting-started/quickstart/) guide to learn how to use apiki.
+After installation, run `apiki version` to confirm it's working.
