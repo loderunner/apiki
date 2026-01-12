@@ -66,7 +66,8 @@ func (m Model) nameGroups() map[string][]int {
 // listHeight calculates how many entries can fit in the visible area.
 func (m Model) listHeight() int {
 	// Fixed overhead: title(1) + top spacer(1) + bottom line(1) + helpbar(1)
-	// The bottom line contains ▼ chevron and/or filter bar (they share the line)
+	// The bottom line contains ▼ chevron and/or filter bar (they share the
+	// line)
 	overhead := 4
 	visible := m.height - overhead
 	if visible < 1 {
@@ -301,7 +302,9 @@ func (m Model) viewList() string {
 	if len(m.entries) == 0 {
 		b.WriteString("\n")
 		if m.mode == modeImport {
-			b.WriteString(dimStyle.Render("  No environment variables to import."))
+			b.WriteString(
+				dimStyle.Render("  No environment variables to import."),
+			)
 		} else {
 			b.WriteString(dimStyle.Render("  No entries. Press + to add one."))
 		}
@@ -365,7 +368,8 @@ func (m Model) viewList() string {
 			checkbox = unselectedStyle.Render("◯ ")
 		}
 
-		// Check if this entry is part of a group (multiple entries with same name)
+		// Check if this entry is part of a group (multiple entries with same
+		// name)
 		groupIndices := groups[entry.Name]
 		grouped := len(groupIndices) > 1
 
@@ -409,7 +413,8 @@ func (m Model) viewList() string {
 				// "from " to match the fuzzy target structure
 				labelText := entry.Label
 				labelPrefix := ""
-				if entry.SourceFile != "" && strings.HasPrefix(entry.Label, "from ") {
+				if entry.SourceFile != "" &&
+					strings.HasPrefix(entry.Label, "from ") {
 					labelPrefix = entry.Label[:5] // "from "
 					labelText = entry.Label[5:]   // "dirname/filename"
 				}
@@ -428,7 +433,15 @@ func (m Model) viewList() string {
 			}
 		}
 
-		fmt.Fprintf(&b, "%s%s%s%s%s\n", cursor, groupPrefix, checkbox, name, label)
+		fmt.Fprintf(
+			&b,
+			"%s%s%s%s%s\n",
+			cursor,
+			groupPrefix,
+			checkbox,
+			name,
+			label,
+		)
 	}
 
 	return b.String()

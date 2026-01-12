@@ -59,7 +59,10 @@ func SortEntries(entries []Entry) {
 		); c != 0 {
 			return c
 		}
-		return strings.Compare(strings.ToLower(a.Label), strings.ToLower(b.Label))
+		return strings.Compare(
+			strings.ToLower(a.Label),
+			strings.ToLower(b.Label),
+		)
 	})
 }
 

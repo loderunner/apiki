@@ -22,10 +22,13 @@ func (m Model) updateConfirmDelete(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				// Save original entries for recovery on persist failure
 				originalEntries := slices.Clone(m.entries)
 
-				m.entries = append(m.entries[:actualIndex], m.entries[actualIndex+1:]...)
+				m.entries = append(
+					m.entries[:actualIndex],
+					m.entries[actualIndex+1:]...)
 				m = m.persistEntries()
 
-				// On persist failure, restore original entries and stay in error mode
+				// On persist failure, restore original entries and stay in
+				// error mode
 				if m.mode == modeError {
 					m.entries = originalEntries
 					return m, nil

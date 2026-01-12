@@ -66,7 +66,9 @@ func (m Model) viewConfirmPromote() string {
 
 	infoStyle := lipgloss.NewStyle().Foreground(colorGray)
 	b.WriteString(
-		infoStyle.Render("  This will create a new entry in your apiki file.\n"),
+		infoStyle.Render(
+			"  This will create a new entry in your apiki file.\n",
+		),
 	)
 
 	return b.String()

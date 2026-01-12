@@ -196,7 +196,8 @@ func generateShellCommands(entries []Entry, env map[string]string) string {
 				)
 			}
 		} else if originalValue != "" {
-			// No entry with this name is selected, unset if it was originally set
+			// No entry with this name is selected, unset if it was originally
+			// set
 			commands = append(commands, fmt.Sprintf("unset %s", entry.Name))
 		}
 	}

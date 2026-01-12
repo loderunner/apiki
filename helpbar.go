@@ -47,7 +47,8 @@ func (m Model) viewHelpBar() string {
 				keyStyle.Render("Space")+labelStyle.Render("Toggle"),
 			)
 
-			// Only show edit/delete/create options in list mode, not import mode
+			// Only show edit/delete/create options in list mode, not import
+			// mode
 			if m.mode == modeList {
 				baseItems = append(baseItems,
 					keyStyle.Render("+")+labelStyle.Render("Create"),

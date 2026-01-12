@@ -155,7 +155,8 @@ func (m Model) saveFormEntry() (tea.Model, tea.Cmd) {
 
 	// Move cursor to the saved entry's new position
 	for i, e := range m.entries {
-		if e.Name == entry.Name && e.Label == entry.Label && e.Value == entry.Value {
+		if e.Name == entry.Name && e.Label == entry.Label &&
+			e.Value == entry.Value {
 			m.cursor = i
 			break
 		}
