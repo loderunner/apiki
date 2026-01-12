@@ -16,7 +16,7 @@
 ### Quick Install
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/loderunner/apiki/main/scripts/install.sh | sh
+curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.sh | sh
 ```
 
 After installation, close and reopen your terminal, or run:
