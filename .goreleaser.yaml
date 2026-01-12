@@ -42,5 +42,7 @@ release:
   github:
     owner: loderunner
     name: apiki
+  mode: append
+  draft: false
   extra_files:
     - glob: dist/install.sh
