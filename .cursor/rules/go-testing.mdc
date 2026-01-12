@@ -1,0 +1,39 @@
+---
+description: Conventions for writing Go tests
+alwaysApply: false
+---
+
+# Go Testing Conventions
+
+## Test Assertions
+
+Use `github.com/stretchr/testify` for test assertions:
+
+- **Prefer `require`** for immediate failure on assertion errors (fail fast)
+- **Use `assert` only** when running multiple assertions where seeing all failures provides useful context
+
+### Examples
+
+```go
+import (
+    "github.com/stretchr/testify/require"
+    "github.com/stretchr/testify/assert"
+)
+
+func TestSomething(t *testing.T) {
+    // Use require for critical setup - fail immediately
+    container, err := startContainer(ctx)
+    require.NoError(t, err, "failed to start container")
+
+    // Use require for single assertions - fail fast
+    result, err := doSomething()
+    require.NoError(t, err)
+    require.Equal(t, expected, result)
+
+    // Use assert only when multiple assertions provide useful context
+    assert.Equal(t, expected1, result1, "first assertion")
+    assert.Equal(t, expected2, result2, "second assertion")
+    assert.Equal(t, expected3, result3, "third assertion")
+    // All three will be checked before failing
+}
+```

@@ -1,0 +1,30 @@
+---
+description: Fixing Go formatting and lint issues
+alwaysApply: false
+---
+
+# Go Formatting
+
+When fixing formatting issues in Go files, **always run the formatter first**
+before attempting manual edits.
+
+## Command
+
+```bash
+go tool golangci-lint fmt ./...
+```
+
+Or for a specific file:
+
+```bash
+go tool golangci-lint fmt path/to/file.go
+```
+
+## Workflow
+
+1. Run `go tool golangci-lint fmt` to auto-fix formatting issues
+2. Re-check lints to see what remains
+3. Only manually fix issues that the formatter cannot handle
+
+Do not attempt to manually fix spacing, indentation, import ordering, or other
+formatting issues that `golangci-lint fmt` handles automatically.
