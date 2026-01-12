@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -10,8 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//go:embed VERSION
-var version string
+var version = "dev"
 
 // variablesFile holds the value of the --variables-file flag.
 var variablesFile string
