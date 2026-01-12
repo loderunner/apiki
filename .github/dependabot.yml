@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: gomod
+    directory: /docs
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps(docs)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
