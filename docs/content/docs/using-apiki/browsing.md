@@ -15,6 +15,15 @@ Each row in the list shows:
 
 Variables with the same name are grouped together with visual connectors (`┌`, `├`, `└`), making it easy to see your alternatives at a glance.
 
+<!-- TODO: Add screenshot (svg-term still frame) showing the list view:
+     - Several variables with checkboxes (⦿/◯)
+     - A radio group with connectors (┌├└)
+     - Variable names in bold, labels in gray
+     - Cursor marker (>) on one row
+     Workflow: asciinema rec → convert to v2 → svg-term --at <ms>
+-->
+*Screenshot coming soon*
+
 ## Navigating
 
 Move through the list with:
@@ -33,6 +42,21 @@ Type to search—apiki uses fuzzy matching, so you don't need exact text. For ex
 - Type `db` to find variables with "database" in the name or label
 - Type `prod` to find production-related variables
 - Type `api` to find API keys and URLs
+
+<!-- TODO: Add asciinema video (~15s) showing real-time filtering:
+     Setup: ~15-20 variables with labels like:
+       - DATABASE_URL (labels: "local dev", "staging", "production")
+       - STRIPE_API_KEY (labels: "test mode", "production")
+       - AWS_ACCESS_KEY_ID (label: "prod account")
+       - GITHUB_API_TOKEN, REDIS_URL, SECRET_PASSWORD (hunter2), etc.
+     Flow:
+       1. Press / to open filter
+       2. Type "api" → narrows to API-related vars (filtering by name)
+       3. Backspace to empty → full list returns
+       4. Type "prod" → shows vars with "prod"/"production" in LABEL
+     Shows: real-time filtering, backspace widening, filtering by label
+-->
+*Video coming soon*
 
 ### Exiting Filter Mode
 

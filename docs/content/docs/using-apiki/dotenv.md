@@ -45,6 +45,17 @@ If you want to keep a variable from a `.env` file in your apiki collection (so i
 4. Edit the variable if needed (it opens in the edit form)
 5. Press `Enter` to save
 
+<!-- TODO: Add asciinema video (~15s) showing the promote flow:
+     1. cd into a project directory with a .env file
+     2. Launch apiki
+     3. Show .env variables with source label (e.g., "from myproject/.env")
+     4. Navigate to a .env variable
+     5. Press = to promote it
+     6. Confirm, optionally edit the label
+     7. Save
+-->
+*Video coming soon*
+
 The variable is now part of your personal collection and will appear regardless of which directory you're in.
 
 ## Multiple Projects

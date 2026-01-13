@@ -28,6 +28,15 @@ For example:
 
 Here, the staging value is selected. Selecting the production row would automatically deselect staging.
 
+<!-- TODO: Add screenshot (svg-term still frame) showing:
+     - DATABASE_URL radio group with 3 alternatives (dev/staging/prod)
+     - Visual connectors (┌, ├, └) linking them
+     - One selected (⦿), two deselected (◯)
+     - Maybe another unrelated variable for context
+     Workflow: asciinema rec → convert to v2 → svg-term --at <ms>
+-->
+*Screenshot coming soon*
+
 ## Applying Changes
 
 When you're done selecting:

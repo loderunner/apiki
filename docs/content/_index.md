@@ -9,7 +9,7 @@ layout: hextra-home
 {{< /hextra/hero-headline >}}
 </div>
 
-<div class="hx:mb-12">
+<div class="hx:mb-16">
 {{< hextra/hero-subtitle >}}
   A clean, interactive TUI for organizing, selecting,&nbsp;<br class="sm:hx:block hx:hidden" />and applying environment variables across projects
 {{< /hextra/hero-subtitle >}}
@@ -33,8 +33,13 @@ curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.
 
 <div class="hx:mt-12"></div>
 
-<div class="hx:mb-12" style="align-self: center;">
-{{< hextra/hero-button text="Get Started" link="docs/getting-started" >}}
+<!-- TODO: Add the same asciinema hero video as README.md
+     Content: launch apiki, create SECRET_PASSWORD=hunter2, show DATABASE_URL 
+     radio group (dev/staging/prod), toggle between them, apply.
+     Layout work needed to make it fit well in the hero section.
+-->
+<div class="hx:text-center hx:mb-12">
+  <em>Demo video coming soon</em>
 </div>
 
 {{< hextra/feature-grid >}}

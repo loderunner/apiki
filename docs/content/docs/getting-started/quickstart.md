@@ -24,6 +24,15 @@ This opens the interactive terminal interface. You'll see a list of environment 
 
 The variable appears in your list and is saved for future sessions.
 
+<!-- TODO: Add short asciinema video (~10s) showing:
+     1. Press +
+     2. Fill in Name, Value, Label fields
+     3. Tab between fields
+     4. Press Enter to save
+     5. Variable appears in list
+-->
+*Video coming soon*
+
 ## Selecting Variables
 
 - Use `↑`/`↓` or `j`/`k` to navigate the list

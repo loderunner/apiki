@@ -21,6 +21,16 @@ Press `i` from the main list to enter import mode. The interface switches to sho
 2. Confirm when prompted
 3. The variables are added to your collection
 
+<!-- TODO: Add asciinema video (~12s) showing import mode:
+     1. Press i to enter import mode
+     2. Show list of current shell environment variables
+     3. Navigate and select a few with Space
+     4. Press Enter to confirm
+     5. Back to main list, imported vars appear with "imported from environment" label
+     NOTE: Record in a clean/dummy environment (Docker or env -i) to avoid leaking personal info
+-->
+*Video coming soon*
+
 Imported variables are automatically selected and labeled "imported from environment" so you can identify them later. You can edit them afterwards to add more descriptive labels.
 
 ## Canceling
