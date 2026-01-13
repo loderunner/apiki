@@ -30,9 +30,8 @@ The new variable appears in your list and is saved for future sessions.
 3. Make your changes
 4. Press `Enter` to save
 
-{{< callout >}}
-Variables from `.env` files can't be edited directly. To modify one, first save it permanently (see [.env Files](/docs/using-apiki/dotenv/)).
-{{< /callout >}}
+> [!NOTE]
+> Variables from `.env` files can't be edited directly. To modify one, first save it permanently (see [.env Files](/docs/using-apiki/dotenv/)).
 
 ## Deleting a Variable
 
@@ -40,9 +39,8 @@ Variables from `.env` files can't be edited directly. To modify one, first save 
 2. Press `-`, `Delete`, or `Backspace`
 3. Confirm the deletion
 
-{{< callout type="warning" >}}
-Variables from `.env` files can't be deleted from apiki—they come from the files in your project. To remove them, edit the `.env` file directly.
-{{< /callout >}}
+> [!WARNING]
+> Variables from `.env` files can't be deleted from apiki—they come from the files in your project. To remove them, edit the `.env` file directly.
 
 ## Creating Alternatives
 

@@ -29,9 +29,8 @@ The variable appears in your list and is saved for future sessions.
 - Use `↑`/`↓` or `j`/`k` to navigate the list
 - Press `Space` to toggle selection
 
-{{< callout >}}
-**Alternatives**: If you have multiple values for the same variable name, selecting one automatically deselects the others. This makes it easy to switch between dev, staging, and production configurations.
-{{< /callout >}}
+> [!NOTE]
+> **Alternatives**: If you have multiple values for the same variable name, selecting one automatically deselects the others. This makes it easy to switch between dev, staging, and production configurations.
 
 ## Applying Changes
 
