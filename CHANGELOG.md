@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/loderunner/apiki/compare/v0.2.3...v0.3.0) (2026-01-13)
+
+
+### Features
+
+* install apiki from package managers and packages ([#12](https://github.com/loderunner/apiki/issues/12)) ([1d3991d](https://github.com/loderunner/apiki/commit/1d3991d8254690f0de024cf244751d7ae605a40b))
+
 ## [0.2.3](https://github.com/loderunner/apiki/compare/v0.2.2...v0.2.3) (2026-01-12)
 
 
