@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# List all available apiki versions from GitHub releases
+
+set -e
+
+github_repo="loderunner/apiki"
+
+# Fetch releases from GitHub API
+versions=$(curl -s "https://api.github.com/repos/${github_repo}/releases" | \
+  grep -oP '"tag_name": "\K[^"]+' | \
+  sed 's/^v//' | \
+  sort -V -r)
+
+if [ -z "$versions" ]; then
+  echo "Error: Could not fetch versions from GitHub" >&2
+  exit 1
+fi
+
+echo "$versions"

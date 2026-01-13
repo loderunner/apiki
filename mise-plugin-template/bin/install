@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Install apiki from download path to install path
+
+set -e
+
+download_path="$ASDF_DOWNLOAD_PATH"
+install_path="$ASDF_INSTALL_PATH"
+
+if [ -z "$download_path" ] || [ -z "$install_path" ]; then
+  echo "Error: ASDF_DOWNLOAD_PATH or ASDF_INSTALL_PATH is not set" >&2
+  exit 1
+fi
+
+mkdir -p "$install_path"
+
+# Copy binary and init scripts
+cp "$download_path/apiki" "$install_path/"
+cp "$download_path/init.bash" "$install_path/" 2>/dev/null || true
+cp "$download_path/init.zsh" "$install_path/" 2>/dev/null || true
+cp "$download_path/init.fish" "$install_path/" 2>/dev/null || true
+
+chmod +x "$install_path/apiki"
+
+cat <<EOF
+
+================================================================================
+  apiki has been installed to ${install_path}
+
+  IMPORTANT: apiki requires shell integration to work. It is NOT on your PATH.
+  
+  Add the following to your shell configuration:
+
+  For bash (~/.bashrc):
+    export APIKI_DIR="${install_path}"
+    [ -s "\$APIKI_DIR/init.bash" ] && . "\$APIKI_DIR/init.bash"
+
+  For zsh (~/.zshrc):
+    export APIKI_DIR="${install_path}"
+    [ -s "\$APIKI_DIR/init.zsh" ] && . "\$APIKI_DIR/init.zsh"
+
+  For fish (~/.config/fish/config.fish):
+    set -gx APIKI_DIR "${install_path}"
+    source "\$APIKI_DIR/init.fish"
+
+  Then restart your shell or source your config file.
+================================================================================
+
+EOF

@@ -41,9 +41,22 @@ jobs:
           if ! git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
           fi
+
+      - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "$GPG_PRIVATE_KEY" | base64 -d | gpg --batch --import
+            # Get the key fingerprint for GoReleaser
+            FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep "^sec" | head -1 | awk '{print $2}' | cut -d'/' -f2)
+            echo "GPG_FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
+          fi
+
       - uses: actions/setup-go@v6
         with:
           go-version: '1.25'
+
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
@@ -51,3 +64,19 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GPG_FINGERPRINT: ${{ env.GPG_FINGERPRINT }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Sync mise plugin
+        env:
+          MISE_PLUGIN_TOKEN: ${{ secrets.MISE_PLUGIN_TOKEN }}
+        run: |
+          git clone https://x-access-token:${MISE_PLUGIN_TOKEN}@github.com/loderunner/asdf-apiki.git /tmp/asdf-apiki
+          cp -r mise-plugin-template/* /tmp/asdf-apiki/
+          cd /tmp/asdf-apiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Sync from apiki ${{ needs.release-please.outputs.tag_name }}"
+          git push
