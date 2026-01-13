@@ -38,6 +38,33 @@ archives:
 checksum:
   algorithm: sha256
 
+signs:
+  # Sign checksums file
+  - id: checksums
+    cmd: gpg
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+    artifacts: checksum
+
+  # Sign .deb and .rpm packages
+  - id: packages
+    cmd: gpg
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+    artifacts: package
+
 release:
   github:
     owner: loderunner
@@ -46,3 +73,53 @@ release:
   draft: false
   extra_files:
     - glob: dist/install.sh
+
+homebrew_casks:
+  - name: apiki
+    repository:
+      owner: loderunner
+      name: homebrew-tap
+    homepage: https://loderunner.github.io/apiki
+    description: TUI environment variable manager
+    # Custom block for non-standard install to share/ instead of bin/
+    custom_block: |
+      artifact "apiki", target: "#{HOMEBREW_PREFIX}/share/apiki/apiki"
+      artifact "init.bash", target: "#{HOMEBREW_PREFIX}/share/apiki/init.bash"
+      artifact "init.zsh", target: "#{HOMEBREW_PREFIX}/share/apiki/init.zsh"
+      artifact "init.fish", target: "#{HOMEBREW_PREFIX}/share/apiki/init.fish"
+    caveats: |
+      apiki requires shell integration to work. Add to your shell config:
+
+      For bash (~/.bashrc):
+        export APIKI_DIR="#{HOMEBREW_PREFIX}/share/apiki"
+        [ -s "$APIKI_DIR/init.bash" ] && . "$APIKI_DIR/init.bash"
+
+      For zsh (~/.zshrc):
+        export APIKI_DIR="#{HOMEBREW_PREFIX}/share/apiki"
+        [ -s "$APIKI_DIR/init.zsh" ] && . "$APIKI_DIR/init.zsh"
+
+      For fish (~/.config/fish/config.fish):
+        set -gx APIKI_DIR "#{HOMEBREW_PREFIX}/share/apiki"
+        source "$APIKI_DIR/init.fish"
+
+      Then restart your shell or source the config file.
+
+nfpms:
+  - package_name: apiki
+    homepage: https://loderunner.github.io/apiki
+    maintainer: loderunner
+    description: TUI evironment variable manager
+    formats:
+      - deb
+      - rpm
+    # Install binary to /usr/share/apiki, NOT /usr/bin - must be used via shell function
+    bindir: /usr/share/apiki
+    contents:
+      - src: scripts/init.bash
+        dst: /usr/share/apiki/init.bash
+      - src: scripts/init.zsh
+        dst: /usr/share/apiki/init.zsh
+      - src: scripts/init.fish
+        dst: /usr/share/apiki/init.fish
+    scripts:
+      postinstall: scripts/postinstall.sh

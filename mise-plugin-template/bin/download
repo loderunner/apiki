@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Download a specific version of apiki
+
+set -e
+
+github_repo="loderunner/apiki"
+version="$1"
+install_path="$ASDF_DOWNLOAD_PATH"
+
+if [ -z "$version" ]; then
+  echo "Usage: $0 <version>" >&2
+  exit 1
+fi
+
+if [ -z "$install_path" ]; then
+  echo "Error: ASDF_DOWNLOAD_PATH is not set" >&2
+  exit 1
+fi
+
+# Detect OS and architecture
+os=$(uname -s | tr '[:upper:]' '[:lower:]')
+arch=$(uname -m)
+
+case "$arch" in
+  x86_64) arch="amd64" ;;
+  aarch64|arm64) arch="arm64" ;;
+  *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+esac
+
+case "$os" in
+  darwin) os="darwin" ;;
+  linux) os="linux" ;;
+  *) echo "Unsupported OS: $os" >&2; exit 1 ;;
+esac
+
+archive_name="apiki_${version}_${os}_${arch}.tar.gz"
+download_url="https://github.com/${github_repo}/releases/download/v${version}/${archive_name}"
+
+mkdir -p "$install_path"
+
+echo "Downloading apiki ${version} for ${os}_${arch}..."
+curl -fsSL -o "${install_path}/${archive_name}" "$download_url"
+
+# Extract archive
+cd "$install_path"
+tar -xzf "$archive_name"
+rm "$archive_name"
+
+echo "Downloaded apiki ${version} to ${install_path}"
