@@ -1,4 +1,4 @@
-package main
+package apiki
 
 import "github.com/charmbracelet/lipgloss"
 

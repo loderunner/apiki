@@ -1,15 +1,14 @@
-package main
+package apiki
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
-func (m Model) updateConfirmDelete(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m Model) updateConfirmPromote(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c":
 		m.cancelled = true
@@ -19,25 +18,13 @@ func (m Model) updateConfirmDelete(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if len(m.filteredIndices) > 0 && m.cursor < len(m.filteredIndices) {
 			actualIndex := m.filteredIndices[m.cursor]
 			if actualIndex < len(m.entries) {
-				// Save original entries for recovery on persist failure
-				originalEntries := slices.Clone(m.entries)
-
-				m.entries = append(
-					m.entries[:actualIndex],
-					m.entries[actualIndex+1:]...)
-				m = m.persistEntries()
-
-				// On persist failure, restore original entries and stay in
-				// error mode
-				if m.mode == modeError {
-					m.entries = originalEntries
-					return m, nil
-				}
-
-				m = m.recomputeFilter()
-				if m.cursor >= len(m.filteredIndices) && m.cursor > 0 {
-					m.cursor--
-				}
+				entry := m.entries[actualIndex]
+				// Proceed to edit form with the entry values pre-filled
+				// editIndex = -1 will create a new entry
+				m.mode = modeEdit
+				var cmd tea.Cmd
+				m, cmd = m.prepareForm(-1, &entry)
+				return m, cmd
 			}
 		}
 		m.mode = modeList
@@ -49,7 +36,7 @@ func (m Model) updateConfirmDelete(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) viewConfirmDelete() string {
+func (m Model) viewConfirmPromote() string {
 	var b strings.Builder
 
 	noFiltered := len(m.filteredIndices) == 0
@@ -66,7 +53,7 @@ func (m Model) viewConfirmDelete() string {
 	entry := m.entries[actualIndex]
 
 	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(ColorBrightYellow)
-	b.WriteString(warnStyle.Render("Delete Variable?"))
+	b.WriteString(warnStyle.Render("Add to apiki?"))
 	b.WriteString("\n\n")
 
 	nameStyle := lipgloss.NewStyle().Bold(true)
@@ -76,6 +63,13 @@ func (m Model) viewConfirmDelete() string {
 		fmt.Fprintf(&b, " %s", labelStyle.Render(entry.Label))
 	}
 	b.WriteString("\n\n")
+
+	infoStyle := lipgloss.NewStyle().Foreground(ColorGray)
+	b.WriteString(
+		infoStyle.Render(
+			"  This will create a new variable in your apiki file.\n",
+		),
+	)
 
 	return b.String()
 }

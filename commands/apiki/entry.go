@@ -1,4 +1,4 @@
-package main
+package apiki
 
 import (
 	"encoding/json"
@@ -64,16 +64,6 @@ func SortEntries(entries []Entry) {
 			strings.ToLower(b.Label),
 		)
 	})
-}
-
-// DefaultEntriesPath returns the default path for the entries file:
-// ~/.apiki/variables.json
-func DefaultEntriesPath() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(home, ".apiki", "variables.json"), nil
 }
 
 // LoadEntries reads entries from the given JSON file path.
