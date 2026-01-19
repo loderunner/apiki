@@ -27,8 +27,8 @@ formatters:
       max-len: 80
       tab-len: 4
       shorten-comments: true
-    # gci:
-    #   sections:
-    #     - standard
-    #     - default
-    #     - prefix(github.com/loderunner/apiki)
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/loderunner/apiki)

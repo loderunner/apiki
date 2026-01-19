@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/loderunner/apiki/internal/crypto"
 	"github.com/spf13/afero"
+
+	"github.com/loderunner/apiki/internal/crypto"
 )
 
 var fs = afero.NewOsFs()

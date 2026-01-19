@@ -7,13 +7,14 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/cobra"
+
 	"github.com/loderunner/apiki/cmd/decrypt"
 	"github.com/loderunner/apiki/cmd/encrypt"
 	"github.com/loderunner/apiki/cmd/rotate"
 	"github.com/loderunner/apiki/internal/entries"
 	"github.com/loderunner/apiki/internal/keychain"
 	"github.com/loderunner/apiki/internal/prompt"
-	"github.com/spf13/cobra"
 )
 
 var version = "dev"

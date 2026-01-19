@@ -6,9 +6,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/loderunner/apiki/internal/crypto"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
+
+	"github.com/loderunner/apiki/internal/crypto"
 )
 
 func TestMain(m *testing.M) {
