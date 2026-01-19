@@ -52,22 +52,22 @@ func (m Model) viewConfirmPromote() string {
 
 	entry := m.entries[actualIndex]
 
-	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(colorBrightYellow)
+	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(ColorBrightYellow)
 	b.WriteString(warnStyle.Render("Add to apiki?"))
 	b.WriteString("\n\n")
 
 	nameStyle := lipgloss.NewStyle().Bold(true)
 	fmt.Fprintf(&b, "  %s", nameStyle.Render(entry.Name))
 	if entry.Label != "" {
-		labelStyle := lipgloss.NewStyle().Foreground(colorGray).Italic(true)
+		labelStyle := lipgloss.NewStyle().Foreground(ColorGray).Italic(true)
 		fmt.Fprintf(&b, " %s", labelStyle.Render(entry.Label))
 	}
 	b.WriteString("\n\n")
 
-	infoStyle := lipgloss.NewStyle().Foreground(colorGray)
+	infoStyle := lipgloss.NewStyle().Foreground(ColorGray)
 	b.WriteString(
 		infoStyle.Render(
-			"  This will create a new entry in your apiki file.\n",
+			"  This will create a new variable in your apiki file.\n",
 		),
 	)
 

@@ -188,14 +188,14 @@ func (m Model) viewForm(title string) string {
 	titleStyle := lipgloss.
 		NewStyle().
 		Bold(true).
-		Foreground(colorBrightBlue)
+		Foreground(ColorBrightBlue)
 	b.WriteString(titleStyle.Render(title))
 	b.WriteString("\n\n")
 
 	labelStyle := lipgloss.NewStyle().Width(8)
 	errorStyle := lipgloss.
 		NewStyle().
-		Foreground(colorBrightRed).
+		Foreground(ColorBrightRed).
 		Italic(true)
 
 	b.WriteString(labelStyle.Render("Name:"))

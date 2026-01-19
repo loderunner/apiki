@@ -3,3 +3,6 @@
 
 # GoReleaser build directory
 dist/
+
+# Variables file
+/variables.json

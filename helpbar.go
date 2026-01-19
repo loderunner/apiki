@@ -8,12 +8,12 @@ import (
 
 func (m Model) viewHelpBar() string {
 	keyStyle := lipgloss.NewStyle().
-		Background(colorCyan).
-		Foreground(colorBlack).
+		Background(ColorCyan).
+		Foreground(ColorBlack).
 		Padding(0, 1)
 
 	labelStyle := lipgloss.NewStyle().
-		Foreground(colorWhite)
+		Foreground(ColorWhite)
 
 	var items []string
 

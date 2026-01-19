@@ -36,12 +36,12 @@ func (m Model) viewConfirmImport() string {
 		}
 	}
 
-	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(colorBrightYellow)
+	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(ColorBrightYellow)
 	b.WriteString(warnStyle.Render("Import Variables?"))
 	b.WriteString("\n\n")
 
-	infoStyle := lipgloss.NewStyle().Foreground(colorWhite)
-	fileStyle := lipgloss.NewStyle().Foreground(colorBrightCyan)
+	infoStyle := lipgloss.NewStyle().Foreground(ColorWhite)
+	fileStyle := lipgloss.NewStyle().Foreground(ColorBrightCyan)
 
 	var variableWord string
 	if selectedCount == 1 {
@@ -58,7 +58,7 @@ func (m Model) viewConfirmImport() string {
 		)),
 	)
 	fmt.Fprintf(&b, "  %s\n\n",
-		fileStyle.Render(m.entriesPath),
+		fileStyle.Render(m.filePath),
 	)
 
 	return b.String()

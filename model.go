@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/loderunner/apiki/internal/entries"
 )
 
 // viewMode represents the current mode of the TUI.
@@ -33,10 +34,20 @@ const (
 
 // Model is the bubbletea model for the apiki TUI.
 type Model struct {
-	entries     []Entry
-	entriesPath string
-	cursor      int
-	mode        viewMode
+	// file holds the apiki entries file (decrypted in memory)
+	file *entries.File
+
+	// filePath is the path to the entries file
+	filePath string
+
+	// encryptionKey is the encryption key (nil if unencrypted)
+	encryptionKey []byte
+
+	// entries holds all entries (apiki + .env) for TUI display
+	entries []Entry
+
+	cursor int
+	mode   viewMode
 
 	currentField inputField
 
@@ -81,9 +92,14 @@ type Model struct {
 	originalEntries []Entry // stored entries when in import mode
 }
 
-// NewModel creates a new Model with the given entries and file path for
-// persistence.
-func NewModel(entries []Entry, entriesPath string) Model {
+// NewModel creates a new Model with the given file, file path, encryption key,
+// and combined entries (apiki + .env) for TUI display.
+func NewModel(
+	file *entries.File,
+	filePath string,
+	encryptionKey []byte,
+	allEntries []Entry,
+) Model {
 	nameInput := textinput.New()
 	nameInput.Placeholder = "VAR_NAME"
 	nameInput.CharLimit = 256
@@ -100,11 +116,13 @@ func NewModel(entries []Entry, entriesPath string) Model {
 	filterInput.Placeholder = "Filter..."
 	filterInput.CharLimit = 256
 
-	SortEntries(entries)
+	SortEntries(allEntries)
 
 	model := Model{
-		entries:         entries,
-		entriesPath:     entriesPath,
+		file:            file,
+		filePath:        filePath,
+		encryptionKey:   encryptionKey,
+		entries:         allEntries,
 		cursor:          0,
 		mode:            modeList,
 		nameInput:       nameInput,
@@ -112,7 +130,7 @@ func NewModel(entries []Entry, entriesPath string) Model {
 		labelInput:      labelInput,
 		filterInput:     filterInput,
 		editIndex:       -1,
-		filteredIndices: make([]int, len(entries)),
+		filteredIndices: make([]int, len(allEntries)),
 	}
 	model = model.recomputeFilter()
 	model = model.updateInputWidths()
@@ -166,9 +184,9 @@ func (m Model) View() string {
 	case modeList, modeImport:
 		b.WriteString(m.viewList())
 	case modeAdd:
-		b.WriteString(m.viewForm("Add Entry"))
+		b.WriteString(m.viewForm("Add Variable"))
 	case modeEdit:
-		b.WriteString(m.viewForm("Edit Entry"))
+		b.WriteString(m.viewForm("Edit Variable"))
 	case modeConfirmDelete:
 		b.WriteString(m.viewConfirmDelete())
 	case modeConfirmPromote:
@@ -185,7 +203,7 @@ func (m Model) View() string {
 		hasMore := m.hasEntriesBelow()
 
 		if hasMore || hasFilter {
-			chevronStyle := lipgloss.NewStyle().Foreground(colorGray)
+			chevronStyle := lipgloss.NewStyle().Foreground(ColorGray)
 			if hasMore {
 				b.WriteString(chevronStyle.Render("▼"))
 				if hasFilter {
@@ -276,17 +294,44 @@ func (m Model) Entries() []Entry {
 
 // persistEntries saves the current entries to the configured file path.
 // Only saves apiki entries (those without SourceFile).
+// Re-encrypts values if encryption is enabled.
 // On error, switches to error mode to display the message.
 func (m Model) persistEntries() Model {
-	apikiEntries := make([]Entry, 0)
+	// Work on a copy to avoid mutating the in-memory state
+	toSave := m.file.Clone()
+
+	// Extract apiki entries from combined entries (those without SourceFile)
+	apikiEntries := make([]entries.Entry, 0)
 	for _, entry := range m.entries {
 		if entry.SourceFile == "" {
-			apikiEntries = append(apikiEntries, entry)
+			apikiEntries = append(apikiEntries, entries.Entry{
+				Name:  entry.Name,
+				Value: entry.Value,
+				Label: entry.Label,
+			})
 		}
 	}
-	if err := SaveEntries(m.entriesPath, apikiEntries); err != nil {
-		m.errorMessage = "Failed to save entries: " + err.Error()
-		m.mode = modeError
+
+	// Update file entries
+	toSave.Entries = apikiEntries
+
+	// Re-encrypt if encryption is enabled
+	if toSave.Encrypted() && m.encryptionKey != nil {
+		if err := toSave.EncryptValues(m.encryptionKey); err != nil {
+			m.errorMessage = "Failed to encrypt variables: " + err.Error()
+			m.mode = modeError
+			return m
+		}
 	}
+
+	// Save file
+	if err := entries.Save(m.filePath, toSave); err != nil {
+		m.errorMessage = "Failed to save variables: " + err.Error()
+		m.mode = modeError
+		return m
+	}
+
+	// Update in-memory file to match saved state (but keep decrypted)
+	m.file.Entries = apikiEntries
 	return m
 }

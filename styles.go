@@ -3,21 +3,21 @@ package main
 import "github.com/charmbracelet/lipgloss"
 
 const (
-	colorBlack         lipgloss.ANSIColor = 0
-	colorRed           lipgloss.ANSIColor = 1
-	colorGreen         lipgloss.ANSIColor = 2
-	colorYellow        lipgloss.ANSIColor = 3
-	colorBlue          lipgloss.ANSIColor = 4
-	colorMagenta       lipgloss.ANSIColor = 5
-	colorCyan          lipgloss.ANSIColor = 6
-	colorWhite         lipgloss.ANSIColor = 7
-	colorGray          lipgloss.ANSIColor = 8
-	colorBrightBlack   lipgloss.ANSIColor = 8
-	colorBrightRed     lipgloss.ANSIColor = 9
-	colorBrightGreen   lipgloss.ANSIColor = 10
-	colorBrightYellow  lipgloss.ANSIColor = 11
-	colorBrightBlue    lipgloss.ANSIColor = 12
-	colorBrightMagenta lipgloss.ANSIColor = 13
-	colorBrightCyan    lipgloss.ANSIColor = 14
-	colorBrightWhite   lipgloss.ANSIColor = 15
+	ColorBlack         lipgloss.ANSIColor = 0
+	ColorRed           lipgloss.ANSIColor = 1
+	ColorGreen         lipgloss.ANSIColor = 2
+	ColorYellow        lipgloss.ANSIColor = 3
+	ColorBlue          lipgloss.ANSIColor = 4
+	ColorMagenta       lipgloss.ANSIColor = 5
+	ColorCyan          lipgloss.ANSIColor = 6
+	ColorWhite         lipgloss.ANSIColor = 7
+	ColorGray          lipgloss.ANSIColor = 8
+	ColorBrightBlack   lipgloss.ANSIColor = 8
+	ColorBrightRed     lipgloss.ANSIColor = 9
+	ColorBrightGreen   lipgloss.ANSIColor = 10
+	ColorBrightYellow  lipgloss.ANSIColor = 11
+	ColorBrightBlue    lipgloss.ANSIColor = 12
+	ColorBrightMagenta lipgloss.ANSIColor = 13
+	ColorBrightCyan    lipgloss.ANSIColor = 14
+	ColorBrightWhite   lipgloss.ANSIColor = 15
 )

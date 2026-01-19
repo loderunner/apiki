@@ -65,14 +65,14 @@ func (m Model) viewConfirmDelete() string {
 
 	entry := m.entries[actualIndex]
 
-	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(colorBrightYellow)
-	b.WriteString(warnStyle.Render("Delete Entry?"))
+	warnStyle := lipgloss.NewStyle().Bold(true).Foreground(ColorBrightYellow)
+	b.WriteString(warnStyle.Render("Delete Variable?"))
 	b.WriteString("\n\n")
 
 	nameStyle := lipgloss.NewStyle().Bold(true)
 	fmt.Fprintf(&b, "  %s", nameStyle.Render(entry.Name))
 	if entry.Label != "" {
-		labelStyle := lipgloss.NewStyle().Foreground(colorGray).Italic(true)
+		labelStyle := lipgloss.NewStyle().Foreground(ColorGray).Italic(true)
 		fmt.Fprintf(&b, " %s", labelStyle.Render(entry.Label))
 	}
 	b.WriteString("\n\n")
