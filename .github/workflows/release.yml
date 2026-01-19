@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build without releasing)'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -27,12 +33,18 @@ jobs:
 
   release:
     name: release
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true' && needs.release-please.outputs.tag_name != ''
+    if: |
+      (needs.release-please.outputs.release_created == 'true' && needs.release-please.outputs.tag_name != '') ||
+      github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v6
       - name: Create local tag for GoReleaser
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -41,6 +53,12 @@ jobs:
           if ! git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
           fi
+
+      - name: Install libsecret (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          apt update
+          apt install -y libsecret-1-dev
 
       - name: Import GPG key
         env:
@@ -61,13 +79,20 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean
+          args: release --clean --split ${{ inputs.dry_run && '--skip=publish' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           GPG_FINGERPRINT: ${{ env.GPG_FINGERPRINT }}
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: dist/
+
       - name: Sync mise plugin
+        if: ${{ !inputs.dry_run }}
         env:
           MISE_PLUGIN_TOKEN: ${{ secrets.MISE_PLUGIN_TOKEN }}
         run: |
