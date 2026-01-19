@@ -71,9 +71,6 @@ release:
   draft: false
   extra_files:
     - glob: dist/install.sh
-    - glob: dist/init.bash
-    - glob: dist/init.zsh
-    - glob: dist/init.fish
 
 homebrew_casks:
   - name: apiki
