@@ -32,7 +32,7 @@ func highlightMatches(
 
 	// Highlight matching characters in text
 	highlightStyle := baseStyle.
-		Foreground(colorBrightYellow).
+		Foreground(ColorBrightYellow).
 		Bold(true)
 
 	var result strings.Builder
@@ -288,7 +288,7 @@ func (m Model) viewList() string {
 	titleStyle := lipgloss.
 		NewStyle().
 		Bold(true).
-		Foreground(colorBrightBlue)
+		Foreground(ColorBrightBlue)
 	title := "Environment Variables"
 	if m.mode == modeImport {
 		title = "Import from Environment"
@@ -296,8 +296,8 @@ func (m Model) viewList() string {
 	b.WriteString(titleStyle.Render(title))
 	b.WriteString("\n")
 
-	dimStyle := lipgloss.NewStyle().Foreground(colorGray)
-	chevronStyle := lipgloss.NewStyle().Foreground(colorGray)
+	dimStyle := lipgloss.NewStyle().Foreground(ColorGray)
+	chevronStyle := lipgloss.NewStyle().Foreground(ColorGray)
 
 	if len(m.entries) == 0 {
 		b.WriteString("\n")
@@ -314,18 +314,18 @@ func (m Model) viewList() string {
 
 	selectedStyle := lipgloss.
 		NewStyle().
-		Foreground(colorBrightGreen)
+		Foreground(ColorBrightGreen)
 	unselectedStyle := lipgloss.
 		NewStyle().
-		Foreground(colorGray)
+		Foreground(ColorGray)
 	cursorStyle := lipgloss.NewStyle().Bold(true)
 	nameStyle := lipgloss.NewStyle().Bold(true)
 	labelStyle := lipgloss.
 		NewStyle().
-		Foreground(colorGray).Italic(true)
+		Foreground(ColorGray).Italic(true)
 	groupConnectorStyle := lipgloss.
 		NewStyle().
-		Foreground(colorGray)
+		Foreground(ColorGray)
 
 	groups := m.nameGroups()
 

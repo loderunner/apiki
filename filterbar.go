@@ -83,8 +83,8 @@ func (m Model) recomputeFilter() Model {
 func (m Model) viewFilterBar() string {
 	var b strings.Builder
 
-	filterStyle := lipgloss.NewStyle().Foreground(colorBrightCyan)
-	countStyle := lipgloss.NewStyle().Foreground(colorGray)
+	filterStyle := lipgloss.NewStyle().Foreground(ColorBrightCyan)
+	countStyle := lipgloss.NewStyle().Foreground(ColorGray)
 
 	b.WriteString(filterStyle.Render("Filter: "))
 	b.WriteString(m.filterInput.View())

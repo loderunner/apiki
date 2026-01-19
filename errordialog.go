@@ -24,12 +24,12 @@ func (m Model) viewError() string {
 
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(colorBrightBlue)
+		Foreground(ColorBrightBlue)
 	b.WriteString(titleStyle.Render("Error"))
 	b.WriteString("\n\n")
 
 	errorStyle := lipgloss.NewStyle().
-		Foreground(colorBrightRed)
+		Foreground(ColorBrightRed)
 	b.WriteString("  ")
 	b.WriteString(errorStyle.Render(m.errorMessage))
 	b.WriteString("\n")
