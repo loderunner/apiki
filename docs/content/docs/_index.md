@@ -18,6 +18,7 @@ weight: 1
 - **`.env` Integration** – Automatically discovers and loads `.env` files from your project
 - **Environment Import** – Capture variables from your current shell
 - **Shell Integration** – Works seamlessly with bash, zsh, and fish
+- **Encryption** – Protect sensitive values at rest with password or keychain-based encryption
 
 ## Quick Start
 

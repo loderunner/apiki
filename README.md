@@ -10,6 +10,7 @@
 - **`.env` File Integration** - Automatically discovers and loads `.env` files from your project directory
 - **Environment Import** - Import variables from your current shell environment
 - **Shell Integration** - Works seamlessly with bash, zsh, and fish
+- **Encryption** - Protect sensitive values with password or keychain-based encryption
 
 <!-- TODO: Add asciinema video (~20s) showing:
      1. Launch apiki
