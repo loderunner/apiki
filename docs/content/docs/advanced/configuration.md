@@ -1,5 +1,5 @@
 ---
-title: "Configuration"
+title: 'Configuration'
 weight: 2
 ---
 
@@ -21,7 +21,7 @@ apiki -f /path/to/my-variables.json
 **With an environment variable:**
 
 ```shell
-export APIKI_VARIABLES_FILE=/path/to/my-variables.json
+export APIKI_FILE=/path/to/my-variables.json
 apiki
 ```
 
@@ -43,16 +43,16 @@ curl -fsSL https://raw.githubusercontent.com/loderunner/apiki/main/scripts/insta
 
 ## Command-Line Options
 
-| Option | Description |
-|--------|-------------|
+| Option                   | Description            |
+| ------------------------ | ---------------------- |
 | `--variables-file`, `-f` | Path to variables file |
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APIKI_VARIABLES_FILE` | Path to variables file | `~/.apiki/variables.json` |
-| `APIKI_DIR` | Installation directory | `~/.local/share/apiki` |
+| Variable     | Description            | Default                   |
+| ------------ | ---------------------- | ------------------------- |
+| `APIKI_FILE` | Path to variables file | `~/.apiki/variables.json` |
+| `APIKI_DIR`  | Installation directory | `~/.local/share/apiki`    |
 
 ## Multiple Configurations
 
@@ -85,11 +85,13 @@ alias apiki-personal='apiki -f ~/.apiki/personal.json'
 ### Permission Errors
 
 Make sure you have read/write access to:
+
 - The directory containing your variables file
 - The variables file itself
 
 ### Command Not Found
 
 If `apiki` isn't recognized:
+
 1. Check that the binary is in your PATH, or
 2. Source your shell configuration: `source ~/.bashrc`
