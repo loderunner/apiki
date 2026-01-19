@@ -1,0 +1,58 @@
+---
+description: Running Go linter and formatter proactively
+alwaysApply: true
+---
+
+# Go Linting
+
+When working with Go code, run the linter yourself rather than relying solely on
+IDE diagnostics. This provides more accurate and complete feedback.
+
+## Commands
+
+Format code:
+
+```shell
+go tool golangci-lint fmt ./...
+```
+
+Lint code:
+
+```shell
+go tool golangci-lint run ./...
+```
+
+## Workflow
+
+**Always run the formatter before the linter.** The formatter fixes issues that
+would otherwise appear as lint errors.
+
+1. Run `go tool golangci-lint fmt ./...` to auto-format
+2. Run `go tool golangci-lint run ./...` to check for remaining issues
+3. Fix any reported problems
+
+## When to Run
+
+Run the formatter and linter:
+
+- After making substantive edits to Go files
+- When the IDE reports linter errors — running the tools directly provides
+  better insight into the actual issues
+- Before considering a task complete
+
+## Targeting Specific Files
+
+For faster feedback on specific files or packages:
+
+```shell
+go tool golangci-lint fmt path/to/file.go
+go tool golangci-lint run path/to/package/...
+```
+
+## Notes
+
+- The IDE will not show all lint errors. Run the commands manually to see all
+issues.
+- The IDE will not refresh the lint errors when you save the file. The commands
+are the source of truth. If the IDE finds linter issues after running the
+commands, ignore the IDE's errors.

@@ -21,8 +21,14 @@ formatters:
   enable:
     - gofumpt
     - golines
+    - gci
   settings:
     golines:
       max-len: 80
       tab-len: 4
       shorten-comments: true
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/loderunner/apiki)
