@@ -40,7 +40,7 @@ source ~/.bashrc  # or ~/.zshrc, etc.
 1. Download the latest release from [GitHub Releases](https://github.com/loderunner/apiki/releases)
 2. Extract the archive for your platform
 3. Move the binary to a directory in your PATH
-4. Set up shell integration (see [Documentation](https://loderunner.github.io/apiki/docs/reference/shell-integration/))
+4. Set up shell integration (see [Documentation](https://loderunner.github.io/apiki/docs/advanced/shell-integration/))
 
 ## Quick Start
 
