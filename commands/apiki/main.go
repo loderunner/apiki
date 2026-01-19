@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/loderunner/apiki/internal/entries"
 	"github.com/loderunner/apiki/internal/keychain"
@@ -66,6 +67,8 @@ func Run(variablesPath string) (string, error) {
 		return "", fmt.Errorf("could not open /dev/tty: %w", err)
 	}
 	defer func() { _ = tty.Close() }()
+
+	lipgloss.SetDefaultRenderer(lipgloss.NewRenderer(tty))
 
 	model := NewModel(file, variablesPath, encryptionKey, allEntries)
 	p := tea.NewProgram(model, tea.WithInput(tty), tea.WithOutput(tty))
