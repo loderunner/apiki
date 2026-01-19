@@ -248,7 +248,7 @@ func TestEncryptValues(t *testing.T) {
 
 		err := file.EncryptValues(invalidKey)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "failed to encrypt entry")
+		require.Contains(t, err.Error(), "failed to encrypt variable")
 	})
 }
 
@@ -318,7 +318,7 @@ func TestDecryptValues(t *testing.T) {
 
 		err = file.DecryptValues(key2)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "failed to decrypt entry")
+		require.Contains(t, err.Error(), "failed to decrypt variable")
 	})
 }
 
