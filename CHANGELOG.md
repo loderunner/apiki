@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/loderunner/apiki/compare/v0.3.1...v0.3.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* use correct token when publishing to homebrew cask ([1cefe9b](https://github.com/loderunner/apiki/commit/1cefe9b4d1d0be0de0ab04e5799e3107a8294327))
+
 ## [0.3.1](https://github.com/loderunner/apiki/compare/v0.3.0...v0.3.1) (2026-01-22)
 
 
