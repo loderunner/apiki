@@ -77,7 +77,7 @@ homebrew_casks:
     repository:
       owner: loderunner
       name: homebrew-tap
-      token: ${{ env.HOMEBREW_TAP_TOKEN }}
+      token: '{{ .Env.HOMEBREW_TAP_TOKEN }}'
     homepage: https://loderunner.github.io/apiki
     description: TUI environment variable manager
     # Custom block for non-standard install to share/ instead of bin/
