@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/loderunner/apiki/compare/v0.3.2...v0.3.3) (2026-01-22)
+
+
+### Bug Fixes
+
+* me being lazy and not checking LLM contributions ([8ea76e8](https://github.com/loderunner/apiki/commit/8ea76e8056750e4f823018b9a88df159bec47189))
+
 ## [0.3.2](https://github.com/loderunner/apiki/compare/v0.3.1...v0.3.2) (2026-01-22)
 
 
