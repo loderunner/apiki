@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/loderunner/apiki/compare/v0.2.3...v0.3.0) (2026-01-22)
+
+
+### Features
+
+* add encryption support for variable values ([#14](https://github.com/loderunner/apiki/issues/14)) ([b718abd](https://github.com/loderunner/apiki/commit/b718abdde3b6ef3db196890f6807e40569e7fda3))
+* change helpbar margins to fit in smaller terminals ([0126c72](https://github.com/loderunner/apiki/commit/0126c721e88a0b241d9a5a6694b5fbd9362413dd))
+* install apiki from package managers and packages ([#12](https://github.com/loderunner/apiki/issues/12)) ([1d3991d](https://github.com/loderunner/apiki/commit/1d3991d8254690f0de024cf244751d7ae605a40b))
+
+
+### Bug Fixes
+
+* add init scripts to release ([0a82fd5](https://github.com/loderunner/apiki/commit/0a82fd56852ff40f8bb9664dbd400c9381ec8f96))
+* render TUI with colors when output is a TTY ([fb1f839](https://github.com/loderunner/apiki/commit/fb1f839e69399b1cd222cee434f53be91bf6f9b1))
+* revert last change ([cca34df](https://github.com/loderunner/apiki/commit/cca34dfa1851fa06604d58653b5f25fd002f3417))
+
 ## [0.2.3](https://github.com/loderunner/apiki/compare/v0.2.2...v0.2.3) (2026-01-12)
 
 
