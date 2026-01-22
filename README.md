@@ -12,14 +12,7 @@
 - **Shell Integration** - Works seamlessly with bash, zsh, and fish
 - **Encryption** - Protect sensitive values with password or keychain-based encryption
 
-<!-- TODO: Add asciinema video (~20s) showing:
-     1. Launch apiki
-     2. Create SECRET_PASSWORD = hunter2
-     3. Show DATABASE_URL radio group with dev/staging/prod alternatives
-     4. Toggle between them with Space to demo radio behavior
-     5. Press Enter to apply
--->
-*Demo video coming soon*
+<script src="https://asciinema.org/a/C0DBtmgXJ97XOLeG.js" id="asciicast-C0DBtmgXJ97XOLeG" async="true"></script>
 
 ## Installation
 
