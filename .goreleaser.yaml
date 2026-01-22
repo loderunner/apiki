@@ -41,26 +41,26 @@ signs:
   - id: checksums
     cmd: gpg
     args:
-      - "--batch"
-      - "--local-user"
-      - "{{ .Env.GPG_FINGERPRINT }}"
-      - "--output"
-      - "${signature}"
-      - "--detach-sign"
-      - "${artifact}"
+      - '--batch'
+      - '--local-user'
+      - '{{ .Env.GPG_FINGERPRINT }}'
+      - '--output'
+      - '${signature}'
+      - '--detach-sign'
+      - '${artifact}'
     artifacts: checksum
 
   # Sign .deb and .rpm packages
   - id: packages
     cmd: gpg
     args:
-      - "--batch"
-      - "--local-user"
-      - "{{ .Env.GPG_FINGERPRINT }}"
-      - "--output"
-      - "${signature}"
-      - "--detach-sign"
-      - "${artifact}"
+      - '--batch'
+      - '--local-user'
+      - '{{ .Env.GPG_FINGERPRINT }}'
+      - '--output'
+      - '${signature}'
+      - '--detach-sign'
+      - '${artifact}'
     artifacts: package
 
 release:
@@ -77,6 +77,7 @@ homebrew_casks:
     repository:
       owner: loderunner
       name: homebrew-tap
+      token: ${{ env.HOMEBREW_TAP_TOKEN }}
     homepage: https://loderunner.github.io/apiki
     description: TUI environment variable manager
     # Custom block for non-standard install to share/ instead of bin/
