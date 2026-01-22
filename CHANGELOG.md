@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/loderunner/apiki/compare/v0.3.0...v0.3.1) (2026-01-22)
+
+
+### Miscellaneous Chores
+
+* release 0.3.1 ([75a13e3](https://github.com/loderunner/apiki/commit/75a13e385453003bfe5721e903173425021248b4))
+
 ## [0.3.0](https://github.com/loderunner/apiki/compare/v0.2.3...v0.3.0) (2026-01-22)
 
 
