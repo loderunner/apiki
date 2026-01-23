@@ -1,9 +1,9 @@
 name: Build and Deploy Documentation
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types:
+      - released
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # Full history for git info
+          fetch-depth: 0 # Full history for git info
 
       - name: Set up Go
         uses: actions/setup-go@v6
