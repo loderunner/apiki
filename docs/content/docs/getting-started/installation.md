@@ -266,9 +266,8 @@ source "$APIKI_DIR/init.fish"
 
 **apiki is NOT installed on your PATH** - it must be used via a shell function. This is by design:
 
-- The `apiki` command is a shell function that wraps the binary with `eval`
-- Running the binary directly just prints `export` commands to stdout, which is useless
-- By installing to a non-PATH location, users who haven't set up shell integration get a clear "command not found" error instead of confusing output
+- The `apiki` binary outputs `export` and `unset` commands to stdout
+- The `apiki` shell command is a function that wraps the binary with `eval`, to interpret the `export` and `unset` commands in the current shell, affecting the environment variables in the current shell
 
 ## Verifying
 
