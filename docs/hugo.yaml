@@ -10,6 +10,8 @@ module:
 
 params:
   description: 'Terminal-based environment variable manager'
+  images:
+    - og-image.png
   theme:
     default: 'system'
     displayToggle: true
