@@ -9,10 +9,14 @@ layout: hextra-home
 {{< /hextra/hero-headline >}}
 </div>
 
-<div class="hx:mb-16">
+<div>
 {{< hextra/hero-subtitle >}}
   A clean, interactive TUI for organizing, selecting,&nbsp;<br class="sm:hx:block hx:hidden" />and applying environment variables across projects
 {{< /hextra/hero-subtitle >}}
+</div>
+
+<div class="hx:w-full" style="padding: 0 20%">
+  <script src="https://asciinema.org/a/C0DBtmgXJ97XOLeG.js" id="asciicast-C0DBtmgXJ97XOLeG" async="true" data-autoplay data-loop data-rows="18" data-poster="npt:0"></script>
 </div>
 
 <div class="hx:relative">
@@ -32,8 +36,6 @@ curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.
 </div>
 
 <div class="hx:mt-12"></div>
-
-<script src="https://asciinema.org/a/C0DBtmgXJ97XOLeG.js" id="asciicast-C0DBtmgXJ97XOLeG" async="true"></script>
 
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
