@@ -12,7 +12,7 @@
 - **Shell Integration** - Works seamlessly with bash, zsh, and fish
 - **Encryption** - Protect sensitive values with password or keychain-based encryption
 
-<script src="https://asciinema.org/a/C0DBtmgXJ97XOLeG.js" id="asciicast-C0DBtmgXJ97XOLeG" async="true"></script>
+[![asciicast](https://asciinema.org/a/C0DBtmgXJ97XOLeG.svg)](https://asciinema.org/a/C0DBtmgXJ97XOLeG)
 
 ## Installation
 

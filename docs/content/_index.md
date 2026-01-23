@@ -33,14 +33,7 @@ curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.
 
 <div class="hx:mt-12"></div>
 
-<!-- TODO: Add the same asciinema hero video as README.md
-     Content: launch apiki, create SECRET_PASSWORD=hunter2, show DATABASE_URL 
-     radio group (dev/staging/prod), toggle between them, apply.
-     Layout work needed to make it fit well in the hero section.
--->
-<div class="hx:text-center hx:mb-12">
-  <em>Demo video coming soon</em>
-</div>
+<script src="https://asciinema.org/a/C0DBtmgXJ97XOLeG.js" id="asciicast-C0DBtmgXJ97XOLeG" async="true"></script>
 
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
