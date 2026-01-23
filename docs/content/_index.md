@@ -15,8 +15,7 @@ layout: hextra-home
 {{< /hextra/hero-subtitle >}}
 </div>
 
-<div class="hx:w-full" style="padding: 0 20%">
-  <script src="https://asciinema.org/a/C0DBtmgXJ97XOLeG.js" id="asciicast-C0DBtmgXJ97XOLeG" async="true" data-autoplay data-loop data-rows="18" data-poster="npt:0"></script>
+<div id="demo" class="hx:w-full" style="padding: 0 20%; margin: 4rem 0;">
 </div>
 
 <div class="hx:relative">
@@ -82,3 +81,13 @@ curl -fsSL https://github.com/loderunner/apiki/releases/latest/download/install.
   >}}
 {{< /hextra/feature-grid >}}
 
+<script src="/apiki/asciinema/asciinema-player.min.js"></script>
+  <script>
+    AsciinemaPlayer.create('full_demo.cast', document.getElementById('demo'), {
+      autoplay: true,
+      loop: true,
+      rows: 18,
+      poster: 'npt:0',
+      speed: 2,
+      idleTimeLimit: 2 });
+  </script>
