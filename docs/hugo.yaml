@@ -15,7 +15,12 @@ params:
     displayToggle: true
   navbar:
     displayTitle: true
-    displayLogo: false
+    displayLogo: true
+    logo:
+      path: favicon.svg
+      dark: favicon-dark.svg
+      width: 24
+      height: 24
     socialLinks:
       github: 'https://github.com/loderunner/apiki'
   page:
@@ -34,14 +39,14 @@ markup:
 
 menu:
   main:
-    - name: "Getting Started"
-      pageRef: "/docs/getting-started"
+    - name: 'Getting Started'
+      pageRef: '/docs/getting-started'
       weight: 1
-    - name: "Using apiki"
-      pageRef: "/docs/using-apiki"
+    - name: 'Using apiki'
+      pageRef: '/docs/using-apiki'
       weight: 2
-    - name: "Advanced"
-      pageRef: "/docs/advanced"
+    - name: 'Advanced'
+      pageRef: '/docs/advanced'
       weight: 3
     - name: Search
       weight: 4
@@ -49,6 +54,6 @@ menu:
         type: search
     - name: GitHub
       weight: 5
-      url: "https://github.com/loderunner/apiki"
+      url: 'https://github.com/loderunner/apiki'
       params:
         icon: github
