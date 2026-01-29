@@ -11,6 +11,7 @@ Use `github.com/stretchr/testify` for test assertions:
 
 - **Prefer `require`** for immediate failure on assertion errors (fail fast)
 - **Use `assert` only** when running multiple assertions where seeing all failures provides useful context
+- **Prefer semantic matchers** over generic assertions for better error messages
 
 ### Examples
 
@@ -36,4 +37,124 @@ func TestSomething(t *testing.T) {
     assert.Equal(t, expected3, result3, "third assertion")
     // All three will be checked before failing
 }
+```
+
+## Semantic Matchers
+
+Use the most specific matcher for the assertion. Generic assertions like `True`, `False`, and `Equal` should only be used as a last resort when no semantic matcher exists.
+
+### Basic matchers
+
+| Instead of                           | Use                               |
+| ------------------------------------ | --------------------------------- |
+| `assert.Equal(t, 3, len(items))`     | `assert.Len(t, items, 3)`         |
+| `assert.True(t, slice.Contains(x))`  | `assert.Contains(t, slice, x)`    |
+| `assert.False(t, slice.Contains(x))` | `assert.NotContains(t, slice, x)` |
+| `assert.True(t, x == nil)`           | `assert.Nil(t, x)`                |
+| `assert.True(t, x != nil)`           | `assert.NotNil(t, x)`             |
+| `assert.True(t, x == "")`            | `assert.Empty(t, x)`              |
+| `assert.True(t, x != "")`            | `assert.NotEmpty(t, x)`           |
+| `assert.True(t, x == 0)`             | `assert.Zero(t, x)`               |
+| `assert.True(t, x != 0)`             | `assert.NotZero(t, x)`            |
+
+### Numeric comparisons
+
+| Instead of               | Use                              |
+| ------------------------ | -------------------------------- |
+| `assert.True(t, x > 0)`  | `assert.Positive(t, x)`          |
+| `assert.True(t, x < 0)`  | `assert.Negative(t, x)`          |
+| `assert.True(t, a > b)`  | `assert.Greater(t, a, b)`        |
+| `assert.True(t, a >= b)` | `assert.GreaterOrEqual(t, a, b)` |
+| `assert.True(t, a < b)`  | `assert.Less(t, a, b)`           |
+| `assert.True(t, a <= b)` | `assert.LessOrEqual(t, a, b)`    |
+
+For floating point comparisons with tolerance, use `InDelta` or `InEpsilon`:
+
+```go
+assert.InDelta(t, expected, actual, 0.01)    // absolute delta
+assert.InEpsilon(t, expected, actual, 0.01)  // relative error
+```
+
+### Error matchers
+
+| Instead of                                         | Use                               |
+| -------------------------------------------------- | --------------------------------- |
+| `assert.True(t, err != nil)`                       | `assert.Error(t, err)`            |
+| `assert.True(t, err == nil)`                       | `assert.NoError(t, err)`          |
+| `assert.True(t, errors.Is(e, tgt))`                | `assert.ErrorIs(t, e, tgt)`       |
+| `assert.Equal(t, err.Error(), msg)`                | `assert.EqualError(t, err, msg)`  |
+| `assert.True(t, strings.Contains(err.Error(), s))` | `assert.ErrorContains(t, err, s)` |
+
+For error type assertions: `assert.ErrorAs(t, err, &target)`
+
+### Type and interface matchers
+
+| Instead of                                              | Use                                            |
+| ------------------------------------------------------- | ---------------------------------------------- |
+| `assert.Equal(t, reflect.TypeOf(x), reflect.TypeOf(y))` | `assert.IsType(t, expected, actual)`           |
+| Check interface implementation                          | `assert.Implements(t, (*Interface)(nil), obj)` |
+
+### String and pattern matchers
+
+| Instead of                                    | Use                           |
+| --------------------------------------------- | ----------------------------- |
+| `assert.True(t, regexp.MatchString(pat, s))`  | `assert.Regexp(t, pat, s)`    |
+| `assert.False(t, regexp.MatchString(pat, s))` | `assert.NotRegexp(t, pat, s)` |
+
+### File system matchers
+
+| Instead of                     | Use                            |
+| ------------------------------ | ------------------------------ |
+| Check file exists              | `assert.FileExists(t, path)`   |
+| Check file does not exist      | `assert.NoFileExists(t, path)` |
+| Check directory exists         | `assert.DirExists(t, path)`    |
+| Check directory does not exist | `assert.NoDirExists(t, path)`  |
+
+### Panic matchers
+
+| Instead of                      | Use                                       |
+| ------------------------------- | ----------------------------------------- |
+| Check function panics           | `assert.Panics(t, func() { ... })`        |
+| Check function does not panic   | `assert.NotPanics(t, func() { ... })`     |
+| Check panic with specific value | `assert.PanicsWithValue(t, expected, fn)` |
+| Check panic with specific error | `assert.PanicsWithError(t, errStr, fn)`   |
+
+### Pointer identity
+
+| Instead of                     | Use                             |
+| ------------------------------ | ------------------------------- |
+| `assert.True(t, ptr1 == ptr2)` | `assert.Same(t, ptr1, ptr2)`    |
+| `assert.True(t, ptr1 != ptr2)` | `assert.NotSame(t, ptr1, ptr2)` |
+
+### Time matchers
+
+```go
+assert.WithinDuration(t, expected, actual, 10*time.Second)
+assert.WithinRange(t, actual, start, end)
+```
+
+### Structured data matchers
+
+```go
+assert.JSONEq(t, expectedJSON, actualJSON)
+assert.YAMLEq(t, expectedYAML, actualYAML)
+```
+
+### Collection matchers
+
+For unordered slice comparison:
+
+```go
+// Good: order-independent comparison
+assert.ElementsMatch(t, actual, []string{"a", "b", "c"})
+
+// Bad: fragile if order changes
+assert.Equal(t, []string{"a", "b", "c"}, actual)
+```
+
+For subset checking:
+
+```go
+assert.Subset(t, [1, 2, 3], [1, 2])      // passes: [1,2] is subset of [1,2,3]
+assert.NotSubset(t, [1, 2, 3], [1, 4])   // passes: [1,4] is not subset
 ```
