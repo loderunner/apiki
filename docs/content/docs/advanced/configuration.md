@@ -49,10 +49,11 @@ curl -fsSL https://raw.githubusercontent.com/loderunner/apiki/main/scripts/insta
 
 ## Environment Variables
 
-| Variable     | Description            | Default                   |
-| ------------ | ---------------------- | ------------------------- |
-| `APIKI_FILE` | Path to variables file | `~/.apiki/variables.json` |
-| `APIKI_DIR`  | Installation directory | `~/.local/share/apiki`    |
+| Variable            | Description                                    | Default                   |
+| ------------------- | ---------------------------------------------- | ------------------------- |
+| `APIKI_FILE`        | Path to variables file                         | `~/.apiki/variables.json` |
+| `APIKI_DIR`         | Installation directory                         | `~/.local/share/apiki`    |
+| `APIKI_AUTO_RESTORE` | Enable automatic variable restore on shell startup | Not set (disabled)      |
 
 ## Multiple Configurations
 

@@ -8,6 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/loderunner/apiki/internal/entries"
 )
 
 // highlightMatches highlights matching characters in the text portion using
@@ -459,7 +461,7 @@ func (m Model) hasEntriesBelow() bool {
 // converts them to Entry format.
 func loadEnvironmentEntries() []Entry {
 	envVars := os.Environ()
-	entries := make([]Entry, 0, len(envVars))
+	result := make([]Entry, 0, len(envVars))
 
 	for _, envVar := range envVars {
 		parts := strings.SplitN(envVar, "=", 2)
@@ -469,16 +471,18 @@ func loadEnvironmentEntries() []Entry {
 		name := parts[0]
 		value := parts[1]
 
-		entries = append(entries, Entry{
-			Name:     name,
-			Value:    value,
-			Label:    value,
+		result = append(result, Entry{
+			Entry: entries.Entry{
+				Name:  name,
+				Value: value,
+				Label: value,
+			},
 			Selected: false,
 		})
 	}
 
-	SortEntries(entries)
-	return entries
+	SortEntries(result)
+	return result
 }
 
 // confirmImport creates apiki entries for all selected environment variables
@@ -490,9 +494,11 @@ func (m Model) confirmImport() (Model, tea.Cmd) {
 		if entry.Selected {
 			// Create new apiki entry (no SourceFile)
 			selectedEntries = append(selectedEntries, Entry{
-				Name:     entry.Name,
-				Value:    entry.Value,
-				Label:    "imported from environment",
+				Entry: entries.Entry{
+					Name:  entry.Name,
+					Value: entry.Value,
+					Label: "imported from environment",
+				},
 				Selected: true,
 			})
 		}

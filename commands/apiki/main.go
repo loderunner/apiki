@@ -8,13 +8,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/loderunner/apiki/commands"
 	"github.com/loderunner/apiki/internal/entries"
-	"github.com/loderunner/apiki/internal/keychain"
-	"github.com/loderunner/apiki/internal/prompt"
 )
 
 // Run executes the apiki root command
-func Run(variablesPath string) (string, error) {
+func Run(variablesPath, configPath string) (string, error) {
 	// Load file (may be encrypted)
 	file, err := entries.Load(variablesPath)
 	if err != nil {
@@ -24,7 +23,7 @@ func Run(variablesPath string) (string, error) {
 	// Unlock if encrypted
 	var encryptionKey []byte
 	if file.Encrypted() {
-		encryptionKey, err = unlockFile(file)
+		encryptionKey, err = commands.Unlock(file)
 		if err != nil {
 			return "", fmt.Errorf("failed to unlock file: %w", err)
 		}
@@ -39,9 +38,7 @@ func Run(variablesPath string) (string, error) {
 	apikiEntries := make([]Entry, len(file.Entries))
 	for i, e := range file.Entries {
 		apikiEntries[i] = Entry{
-			Name:       e.Name,
-			Value:      e.Value,
-			Label:      e.Label,
+			Entry:      e,
 			Selected:   false,
 			SourceFile: "",
 		}
@@ -55,10 +52,13 @@ func Run(variablesPath string) (string, error) {
 	// Combine apiki entries with .env entries (no deduplication)
 	allEntries := append(apikiEntries, dotEnvEntries...)
 
+	// Sort all entries together
+	SortEntries(allEntries)
+
 	// Capture the environment state for all entry names at startup
 	envSnapshot := captureEnvironment(allEntries)
 
-	// Sync selection state with captured environment
+	// Sync selection state with captured environment (for all entries)
 	syncWithEnvironment(allEntries, envSnapshot)
 
 	// Open TTY for TUI input/output, keeping stdout clean for shell commands
@@ -70,7 +70,13 @@ func Run(variablesPath string) (string, error) {
 
 	lipgloss.SetDefaultRenderer(lipgloss.NewRenderer(tty))
 
-	model := NewModel(file, variablesPath, encryptionKey, allEntries)
+	model := NewModel(
+		file,
+		variablesPath,
+		configPath,
+		encryptionKey,
+		allEntries,
+	)
 	p := tea.NewProgram(model, tea.WithInput(tty), tea.WithOutput(tty))
 
 	finalModel, err := p.Run()
@@ -122,9 +128,8 @@ func captureEnvironment(entries []Entry) map[string]string {
 //
 // A variable is marked as Selected if both its Name and Value match the
 // environment. For variables with duplicate names (radio groups), only the
-// variable
-// whose value matches the environment is selected. If no exact match is found,
-// no variable with that name is selected.
+// variable whose value matches the environment is selected. If no exact match
+// is found, no variable with that name is selected.
 func syncWithEnvironment(entries []Entry, env map[string]string) {
 	selectedNames := make(map[string]struct{})
 
@@ -195,60 +200,4 @@ func generateShellCommands(entries []Entry, env map[string]string) string {
 	}
 
 	return strings.Join(commands, "\n")
-}
-
-// unlockFile prompts for password or retrieves key from keychain to unlock
-// an encrypted file. Returns the encryption key.
-func unlockFile(file *entries.File) ([]byte, error) {
-	if !file.Encrypted() {
-		return nil, fmt.Errorf("file is not encrypted")
-	}
-
-	if file.Encryption.Mode == "password" {
-		// Check for APIKI_PASSWORD environment variable
-		if password := os.Getenv("APIKI_PASSWORD"); password != "" {
-			key, err := file.VerifyPassword(password)
-			if err != nil {
-				return nil, fmt.Errorf(
-					"invalid password from APIKI_PASSWORD: %w",
-					err,
-				)
-			}
-			return key, nil
-		}
-
-		// Prompt for password
-		firstAttempt := true
-		for {
-			password, err := prompt.ReadPassword("Enter password: ")
-			if err != nil {
-				return nil, fmt.Errorf("failed to read password: %w", err)
-			}
-
-			key, err := file.VerifyPassword(password)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Wrong password.\n")
-				if firstAttempt {
-					firstAttempt = false
-					continue
-				}
-
-				return nil, fmt.Errorf("too many wrong password attempts")
-			}
-			return key, nil
-		}
-	} else if file.Encryption.Mode == "keychain" {
-		// Retrieve from keychain (may trigger Touch ID on macOS)
-		fmt.Fprintf(os.Stderr, "Unlocking variables with keychain...\n")
-		key, err := keychain.Retrieve()
-		if err != nil {
-			return nil, fmt.Errorf(
-				"failed to retrieve key from keychain: %w",
-				err,
-			)
-		}
-		return key, nil
-	}
-
-	return nil, fmt.Errorf("unknown encryption mode: %q", file.Encryption.Mode)
 }
