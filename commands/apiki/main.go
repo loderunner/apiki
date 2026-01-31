@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/loderunner/apiki/commands"
-	"github.com/loderunner/apiki/internal/config"
 	"github.com/loderunner/apiki/internal/entries"
 )
 
@@ -35,12 +34,6 @@ func Run(variablesPath, configPath string) (string, error) {
 		}
 	}
 
-	// Load config
-	cfg, err := config.Load(configPath)
-	if err != nil {
-		return "", fmt.Errorf("could not load config file: %w", err)
-	}
-
 	// Convert entries.File entries to TUI Entry format
 	apikiEntries := make([]Entry, len(file.Entries))
 	for i, e := range file.Entries {
@@ -59,44 +52,14 @@ func Run(variablesPath, configPath string) (string, error) {
 	// Combine apiki entries with .env entries (no deduplication)
 	allEntries := append(apikiEntries, dotEnvEntries...)
 
-	// Sort all entries together (same order as when saving)
+	// Sort all entries together
 	SortEntries(allEntries)
-
-	// Extract apiki entries from sorted allEntries and apply config selection
-	// Config IDs are computed based on sorted apiki entries only
-	sortedApikiEntries := make([]Entry, 0)
-	for i := range allEntries {
-		if allEntries[i].SourceFile == "" {
-			sortedApikiEntries = append(sortedApikiEntries, allEntries[i])
-		}
-	}
-
-	// Convert sortedApikiEntries to []entries.Entry for EntryID calculation
-	entriesForID := make([]entries.Entry, len(sortedApikiEntries))
-	for i, e := range sortedApikiEntries {
-		entriesForID[i] = e.Entry
-	}
-
-	// Apply selection state from config to sorted apiki entries
-	for i := range sortedApikiEntries {
-		entryID := config.EntryID(entriesForID, i)
-		sortedApikiEntries[i].Selected = cfg.Selected.Has(entryID)
-	}
-
-	// Update allEntries with selection state from sortedApikiEntries
-	apikiIdx := 0
-	for i := range allEntries {
-		if allEntries[i].SourceFile == "" {
-			allEntries[i].Selected = sortedApikiEntries[apikiIdx].Selected
-			apikiIdx++
-		}
-	}
 
 	// Capture the environment state for all entry names at startup
 	envSnapshot := captureEnvironment(allEntries)
 
-	// Sync selection state with captured environment (only for .env entries)
-	syncWithEnvironment(dotEnvEntries, envSnapshot)
+	// Sync selection state with captured environment (for all entries)
+	syncWithEnvironment(allEntries, envSnapshot)
 
 	// Open TTY for TUI input/output, keeping stdout clean for shell commands
 	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
@@ -161,14 +124,12 @@ func captureEnvironment(entries []Entry) map[string]string {
 }
 
 // syncWithEnvironment updates the Selected state of each variable based on the
-// captured environment snapshot. Only syncs .env entries (those with
-// SourceFile).
+// captured environment snapshot.
 //
 // A variable is marked as Selected if both its Name and Value match the
 // environment. For variables with duplicate names (radio groups), only the
 // variable whose value matches the environment is selected. If no exact match
-// is found,
-// no variable with that name is selected.
+// is found, no variable with that name is selected.
 func syncWithEnvironment(entries []Entry, env map[string]string) {
 	selectedNames := make(map[string]struct{})
 
