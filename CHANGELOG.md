@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/loderunner/apiki/compare/v0.3.3...v0.4.0) (2026-01-31)
+
+
+### Features
+
+* add restore command to restore variables in new terminals ([#26](https://github.com/loderunner/apiki/issues/26)) ([1a62104](https://github.com/loderunner/apiki/commit/1a62104ed2bcf57ab687b61628dc2160cbca18a1))
+
 ## [0.3.3](https://github.com/loderunner/apiki/compare/v0.3.2...v0.3.3) (2026-01-22)
 
 
