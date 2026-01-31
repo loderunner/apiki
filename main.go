@@ -12,6 +12,7 @@ import (
 	"github.com/loderunner/apiki/commands/apiki"
 	"github.com/loderunner/apiki/commands/decrypt"
 	"github.com/loderunner/apiki/commands/encrypt"
+	"github.com/loderunner/apiki/commands/restore"
 	"github.com/loderunner/apiki/commands/rotate"
 )
 
@@ -29,12 +30,16 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not resolve variables file: %w", err)
 			}
-			output, err := apiki.Run(variablesPath)
+			configPath, err := resolveConfigFile(variablesPath)
+			if err != nil {
+				return fmt.Errorf("could not resolve config file: %w", err)
+			}
+			output, err := apiki.Run(variablesPath, configPath)
 			if err != nil {
 				return err
 			}
 			if output != "" {
-				fmt.Printf("%s\n", output)
+				cmd.Printf("%s\n", output)
 			}
 			return nil
 		},
@@ -111,10 +116,34 @@ func main() {
 		},
 	}
 
+	restoreCmd := &cobra.Command{
+		Use:   "restore",
+		Short: "Restore selected variables from previous session",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			variablesPath, err := resolveVariablesFile(cmd)
+			if err != nil {
+				return fmt.Errorf("could not resolve variables file: %w", err)
+			}
+			configPath, err := resolveConfigFile(variablesPath)
+			if err != nil {
+				return fmt.Errorf("could not resolve config file: %w", err)
+			}
+			output, err := restore.Run(variablesPath, configPath)
+			if err != nil {
+				return err
+			}
+			if output != "" {
+				cmd.Printf("%s\n", output)
+			}
+			return nil
+		},
+	}
+
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(encryptCmd)
 	rootCmd.AddCommand(decryptCmd)
 	rootCmd.AddCommand(rotateCmd)
+	rootCmd.AddCommand(restoreCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -143,4 +172,12 @@ func resolveVariablesFile(cmd *cobra.Command) (string, error) {
 		return "", err
 	}
 	return filepath.Join(home, ".apiki", "variables.json"), nil
+}
+
+// resolveConfigFile determines the config file path based on the variables file
+// path.
+// Config file is in the same directory as variables file, named "config.json".
+func resolveConfigFile(variablesPath string) (string, error) {
+	dir := filepath.Dir(variablesPath)
+	return filepath.Join(dir, "config.json"), nil
 }

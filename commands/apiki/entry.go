@@ -1,34 +1,24 @@
 package apiki
 
 import (
-	"encoding/json"
-	"errors"
-	"io/fs"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/loderunner/apiki/internal/entries"
 )
 
 // Entry represents an environment variable entry managed by apiki.
 type Entry struct {
-	// Name is the environment variable name (e.g., "PATH", "DATABASE_URL").
-	Name string `json:"name"`
-
-	// Value is the value to set when the entry is selected.
-	Value string `json:"value"`
-
-	// Label is a human-readable description of this entry.
-	Label string `json:"label"`
+	entries.Entry
 
 	// Selected indicates whether this entry should be exported (true) or unset
-	// (false). Not serialized to JSON.
-	Selected bool `json:"-"`
+	// (false).
+	Selected bool
 
 	// SourceFile is the path to the .env file this entry came from.
 	// Empty string means the entry came from the apiki file.
-	// Not serialized to JSON.
-	SourceFile string `json:"-"`
+	SourceFile string
 }
 
 // FuzzyTarget returns the string to use for fuzzy matching this entry.
@@ -64,50 +54,4 @@ func SortEntries(entries []Entry) {
 			strings.ToLower(b.Label),
 		)
 	})
-}
-
-// LoadEntries reads entries from the given JSON file path.
-//
-// If the file does not exist, it returns an empty slice (not an error).
-// The directory is created if it does not exist.
-func LoadEntries(path string) ([]Entry, error) {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, err
-	}
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return []Entry{}, nil
-		}
-		return nil, err
-	}
-
-	if len(data) == 0 {
-		return []Entry{}, nil
-	}
-
-	var entries []Entry
-	if err := json.Unmarshal(data, &entries); err != nil {
-		return nil, err
-	}
-
-	return entries, nil
-}
-
-// SaveEntries writes entries to the given JSON file path.
-// The file with full path is created if it does not exist.
-func SaveEntries(path string, entries []Entry) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return err
-	}
-
-	data, err := json.MarshalIndent(entries, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(path, data, 0o644)
 }

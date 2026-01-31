@@ -37,11 +37,15 @@ func (h EncryptionHeader) Enabled() bool {
 }
 
 // Entry represents an environment variable entry.
-// This is the serializable version (no Selected, SourceFile fields).
 type Entry struct {
-	Name  string `json:"name"`
-	Value string `json:"value"` // plaintext or "enc:v1:..." ciphertext
-	Label string `json:"label,omitempty"`
+	// Name is the environment variable name (e.g., "PATH", "DATABASE_URL").
+	Name string `json:"name"`
+
+	// Value is the value to set when the entry is selected.
+	Value string `json:"value"`
+
+	// Label is a human-readable description of this entry.
+	Label string `json:"label"`
 }
 
 // Load reads the file from disk and parses it into memory.

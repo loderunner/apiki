@@ -7,6 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/loderunner/apiki/internal/entries"
 )
 
 func (m Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -123,9 +125,11 @@ func (m Model) saveFormEntry() (tea.Model, tea.Cmd) {
 	}
 
 	entry := Entry{
-		Name:     name,
-		Value:    value,
-		Label:    strings.TrimSpace(m.labelInput.Value()),
+		Entry: entries.Entry{
+			Name:  name,
+			Value: value,
+			Label: strings.TrimSpace(m.labelInput.Value()),
+		},
 		Selected: false,
 	}
 

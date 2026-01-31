@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+
+	"github.com/loderunner/apiki/internal/entries"
 )
 
 // FindDotEnvFiles walks upward from startDir and collects all .env and .env.*
@@ -61,18 +63,20 @@ func ParseDotEnvFile(path string) ([]Entry, error) {
 	dirname := filepath.Base(dir)
 	label := "from " + dirname + "/" + filename
 
-	entries := make([]Entry, 0, len(envMap))
+	result := make([]Entry, 0, len(envMap))
 	for name, value := range envMap {
-		entries = append(entries, Entry{
-			Name:       name,
-			Value:      value,
-			Label:      label,
+		result = append(result, Entry{
+			Entry: entries.Entry{
+				Name:  name,
+				Value: value,
+				Label: label,
+			},
 			Selected:   false,
 			SourceFile: path,
 		})
 	}
 
-	return entries, nil
+	return result, nil
 }
 
 // LoadDotEnvEntries finds and parses all .env files upward from PWD.

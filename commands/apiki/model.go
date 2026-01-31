@@ -7,7 +7,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/loderunner/apiki/internal/config"
 	"github.com/loderunner/apiki/internal/entries"
+	"github.com/loderunner/apiki/internal/set"
 )
 
 // viewMode represents the current mode of the TUI.
@@ -40,6 +42,9 @@ type Model struct {
 
 	// filePath is the path to the entries file
 	filePath string
+
+	// configPath is the path to the config file
+	configPath string
 
 	// encryptionKey is the encryption key (nil if unencrypted)
 	encryptionKey []byte
@@ -93,11 +98,12 @@ type Model struct {
 	originalEntries []Entry // stored entries when in import mode
 }
 
-// NewModel creates a new Model with the given file, file path, encryption key,
-// and combined entries (apiki + .env) for TUI display.
+// NewModel creates a new Model with the given file, file path, config path,
+// encryption key, and combined entries (apiki + .env) for TUI display.
 func NewModel(
 	file *entries.File,
 	filePath string,
+	configPath string,
 	encryptionKey []byte,
 	allEntries []Entry,
 ) Model {
@@ -122,6 +128,7 @@ func NewModel(
 	model := Model{
 		file:            file,
 		filePath:        filePath,
+		configPath:      configPath,
 		encryptionKey:   encryptionKey,
 		entries:         allEntries,
 		cursor:          0,
@@ -296,6 +303,7 @@ func (m Model) Entries() []Entry {
 // persistEntries saves the current entries to the configured file path.
 // Only saves apiki entries (those without SourceFile).
 // Re-encrypts values if encryption is enabled.
+// Also saves config with selection state.
 // On error, switches to error mode to display the message.
 func (m Model) persistEntries() Model {
 	// Work on a copy to avoid mutating the in-memory state
@@ -325,9 +333,30 @@ func (m Model) persistEntries() Model {
 		}
 	}
 
-	// Save file
+	// Save variables file
 	if err := entries.Save(m.filePath, toSave); err != nil {
 		m.errorMessage = "Failed to save variables: " + err.Error()
+		m.mode = modeError
+		return m
+	}
+
+	// Build and save config with selection state
+	cfg := &config.Config{
+		Selected: set.New[string](),
+	}
+	// Map TUI entry indices to apiki entry indices
+	apikiIndex := 0
+	for _, entry := range m.entries {
+		if entry.SourceFile == "" {
+			if entry.Selected {
+				entryID := config.EntryID(apikiEntries, apikiIndex)
+				cfg.Selected.Add(entryID)
+			}
+			apikiIndex++
+		}
+	}
+	if err := config.Save(m.configPath, cfg); err != nil {
+		m.errorMessage = "Failed to save config: " + err.Error()
 		m.mode = modeError
 		return m
 	}
