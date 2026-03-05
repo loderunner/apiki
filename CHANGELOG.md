@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/loderunner/apiki/compare/v0.4.0...v0.4.1) (2026-03-05)
+
+
+### Bug Fixes
+
+* shell commands being written to stderr instead of stdout ([#38](https://github.com/loderunner/apiki/issues/38)) ([6284e89](https://github.com/loderunner/apiki/commit/6284e897ba38e461a5ad58510083c8242f539017))
+
 ## [0.4.0](https://github.com/loderunner/apiki/compare/v0.3.3...v0.4.0) (2026-01-31)
 
 
