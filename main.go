@@ -39,7 +39,8 @@ func main() {
 				return err
 			}
 			if output != "" {
-				cmd.Printf("%s\n", output)
+				_, err = fmt.Fprintf(os.Stdout, "%s\n", output)
+				return err
 			}
 			return nil
 		},
@@ -133,7 +134,8 @@ func main() {
 				return err
 			}
 			if output != "" {
-				cmd.Printf("%s\n", output)
+				_, err = fmt.Fprintf(os.Stdout, "%s\n", output)
+				return err
 			}
 			return nil
 		},
