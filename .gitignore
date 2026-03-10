@@ -4,5 +4,5 @@
 # GoReleaser build directory
 dist/
 
-# Variables file
-/variables.json
+# Test directory
+/.apiki/
