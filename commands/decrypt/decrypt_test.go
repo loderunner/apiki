@@ -19,7 +19,11 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func seedEncryptedFile(t *testing.T, path string, password string) *entries.File {
+func seedEncryptedFile(
+	t *testing.T,
+	path string,
+	password string,
+) *entries.File {
 	t.Helper()
 	file := &entries.File{
 		Entries: []entries.Entry{
@@ -40,7 +44,10 @@ func TestDecryptPasswordMode(t *testing.T) {
 	seedEncryptedFile(t, "/tmp/enc.json", "secret")
 
 	ctx := context.Background()
-	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter([]string{"secret"}, []string{"yes"}))
+	ctx = prompt.WithPrompter(
+		ctx,
+		testutil.NewMockPrompter([]string{"secret"}, []string{"yes"}),
+	)
 	ctx = keychain.WithKeychain(ctx, &testutil.MockKeychain{})
 
 	err := Run(ctx, "/tmp/enc.json")
@@ -69,7 +76,10 @@ func TestDecryptKeychainMode(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter(nil, []string{"yes"}))
+	ctx = prompt.WithPrompter(
+		ctx,
+		testutil.NewMockPrompter(nil, []string{"yes"}),
+	)
 	ctx = keychain.WithKeychain(ctx, mockKC)
 
 	err = Run(ctx, "/tmp/kc.json")
@@ -98,8 +108,12 @@ func TestDecryptNotEncrypted(t *testing.T) {
 
 func TestDecryptNoEntries(t *testing.T) {
 	file := &entries.File{
-		Encryption: entries.EncryptionHeader{Mode: "password", Salt: "x", Verifier: "y"},
-		Entries:    []entries.Entry{},
+		Encryption: entries.EncryptionHeader{
+			Mode:     "password",
+			Salt:     "x",
+			Verifier: "y",
+		},
+		Entries: []entries.Entry{},
 	}
 	err := entries.Save("/tmp/empty.json", file)
 	require.NoError(t, err)

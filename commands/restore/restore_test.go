@@ -42,7 +42,11 @@ func TestRestorePlainFile(t *testing.T) {
 	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter(nil, nil))
 	ctx = keychain.WithKeychain(ctx, &testutil.MockKeychain{})
 
-	output, err := Run(ctx, "/tmp/restore/vars.json", "/tmp/restore/config.json")
+	output, err := Run(
+		ctx,
+		"/tmp/restore/vars.json",
+		"/tmp/restore/config.json",
+	)
 	require.NoError(t, err)
 	require.Contains(t, output, "export FOO='bar'")
 	require.NotContains(t, output, "BAZ")
@@ -68,10 +72,17 @@ func TestRestoreEncryptedFile(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter([]string{"mypass"}, nil))
+	ctx = prompt.WithPrompter(
+		ctx,
+		testutil.NewMockPrompter([]string{"mypass"}, nil),
+	)
 	ctx = keychain.WithKeychain(ctx, &testutil.MockKeychain{})
 
-	output, err := Run(ctx, "/tmp/restore2/vars.json", "/tmp/restore2/config.json")
+	output, err := Run(
+		ctx,
+		"/tmp/restore2/vars.json",
+		"/tmp/restore2/config.json",
+	)
 	require.NoError(t, err)
 	require.Contains(t, output, "export SECRET='value'")
 }
@@ -90,7 +101,11 @@ func TestRestoreEmptySelection(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	output, err := Run(ctx, "/tmp/restore3/vars.json", "/tmp/restore3/config.json")
+	output, err := Run(
+		ctx,
+		"/tmp/restore3/vars.json",
+		"/tmp/restore3/config.json",
+	)
 	require.NoError(t, err)
 	require.Empty(t, output)
 }

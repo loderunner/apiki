@@ -32,7 +32,13 @@ func newTestModel(t *testing.T, testEntries []Entry) Model {
 			})
 		}
 	}
-	return NewModel(file, "/tmp/test/variables.json", "/tmp/test/config.json", nil, testEntries)
+	return NewModel(
+		file,
+		"/tmp/test/variables.json",
+		"/tmp/test/config.json",
+		nil,
+		testEntries,
+	)
 }
 
 func sendKey(m Model, key tea.KeyMsg) (Model, tea.Cmd) {
@@ -167,7 +173,10 @@ func TestModel_AddEntry(t *testing.T) {
 
 func TestModel_EditEntry(t *testing.T) {
 	testEntries := []Entry{
-		{Entry: entries.Entry{Name: "FOO", Value: "bar", Label: "old"}, Selected: false},
+		{
+			Entry:    entries.Entry{Name: "FOO", Value: "bar", Label: "old"},
+			Selected: false,
+		},
 	}
 	m := newTestModel(t, testEntries)
 	m, _ = sendWindowSize(m, 80, 24)

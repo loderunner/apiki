@@ -29,7 +29,10 @@ func TestUnlockPasswordMode(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter([]string{"secret"}, nil))
+	ctx = prompt.WithPrompter(
+		ctx,
+		testutil.NewMockPrompter([]string{"secret"}, nil),
+	)
 	ctx = keychain.WithKeychain(ctx, &testutil.MockKeychain{})
 
 	gotKey, err := Unlock(ctx, file)
@@ -50,7 +53,10 @@ func TestUnlockPasswordWrongPassword(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter([]string{"wrong", "wrong"}, nil))
+	ctx = prompt.WithPrompter(
+		ctx,
+		testutil.NewMockPrompter([]string{"wrong", "wrong"}, nil),
+	)
 	ctx = keychain.WithKeychain(ctx, &testutil.MockKeychain{})
 
 	_, err = Unlock(ctx, file)

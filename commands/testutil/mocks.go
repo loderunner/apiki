@@ -5,8 +5,10 @@ import (
 	"sync"
 )
 
-var keychainRetrieveErr = errors.New("mock keychain retrieve failed")
-var promptReadErr = errors.New("mock prompter: no more values")
+var (
+	keychainRetrieveErr = errors.New("mock keychain retrieve failed")
+	promptReadErr       = errors.New("mock prompter: no more values")
+)
 
 // MockKeychain implements keychain.Keychain for testing.
 type MockKeychain struct {
@@ -80,7 +82,10 @@ func (m *MockPrompter) ReadPassword(prompt string) (string, error) {
 }
 
 // ReadChoice returns the next choice from the list.
-func (m *MockPrompter) ReadChoice(prompt string, choices map[rune]string) (string, error) {
+func (m *MockPrompter) ReadChoice(
+	prompt string,
+	choices map[rune]string,
+) (string, error) {
 	if m.choiceI >= len(m.choices) {
 		return "", promptReadErr
 	}

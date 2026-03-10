@@ -78,8 +78,12 @@ func TestRotateNotEncrypted(t *testing.T) {
 
 func TestRotateNoEntries(t *testing.T) {
 	file := &entries.File{
-		Encryption: entries.EncryptionHeader{Mode: "password", Salt: "x", Verifier: "y"},
-		Entries:    []entries.Entry{},
+		Encryption: entries.EncryptionHeader{
+			Mode:     "password",
+			Salt:     "x",
+			Verifier: "y",
+		},
+		Entries: []entries.Entry{},
 	}
 	err := entries.Save("/tmp/empty.json", file)
 	require.NoError(t, err)

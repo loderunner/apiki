@@ -14,7 +14,10 @@ import (
 )
 
 // Run executes the apiki root command
-func Run(ctx context.Context, variablesPath, configPath string) (string, error) {
+func Run(
+	ctx context.Context,
+	variablesPath, configPath string,
+) (string, error) {
 	// Load file (may be encrypted)
 	file, err := entries.Load(variablesPath)
 	if err != nil {

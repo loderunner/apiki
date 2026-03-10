@@ -53,7 +53,10 @@ func TestEncryptPasswordMode(t *testing.T) {
 func TestEncryptKeychainMode(t *testing.T) {
 	mockKC := &testutil.MockKeychain{}
 	ctx := context.Background()
-	ctx = prompt.WithPrompter(ctx, testutil.NewMockPrompter(nil, []string{"keychain"}))
+	ctx = prompt.WithPrompter(
+		ctx,
+		testutil.NewMockPrompter(nil, []string{"keychain"}),
+	)
 	ctx = keychain.WithKeychain(ctx, mockKC)
 
 	file := &entries.File{
@@ -78,8 +81,12 @@ func TestEncryptAlreadyEncrypted(t *testing.T) {
 	ctx = keychain.WithKeychain(ctx, &testutil.MockKeychain{})
 
 	file := &entries.File{
-		Encryption: entries.EncryptionHeader{Mode: "password", Salt: "x", Verifier: "y"},
-		Entries:    []entries.Entry{{Name: "FOO", Value: "enc:v1:xxx"}},
+		Encryption: entries.EncryptionHeader{
+			Mode:     "password",
+			Salt:     "x",
+			Verifier: "y",
+		},
+		Entries: []entries.Entry{{Name: "FOO", Value: "enc:v1:xxx"}},
 	}
 	seedVariablesFile(t, "/tmp/encrypted.json", file)
 

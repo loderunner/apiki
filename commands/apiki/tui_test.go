@@ -115,13 +115,20 @@ func TestTUIFilterAndSelect(t *testing.T) {
 		_ = tm.Quit()
 	})
 
-	// Enter filter mode, type "ba", Enter to exit filter input (list stays filtered)
+	// Enter filter mode, type "ba", Enter to exit filter input (list stays
+	// filtered)
 	tm.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("/")})
 	tm.Type("ba")
-	tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // exit filter input - now we can use Space
-	tm.Send(tea.KeyMsg{Type: tea.KeySpace, Runes: []rune(" ")}) // select first filtered (BAR)
-	tm.Send(tea.KeyMsg{Type: tea.KeyEscape})                  // clear filter
-	tm.Send(tea.KeyMsg{Type: tea.KeyEnter})                     // apply and quit
+	tm.Send(
+		tea.KeyMsg{Type: tea.KeyEnter},
+	) // exit filter input - now we can use Space
+	tm.Send(
+		tea.KeyMsg{Type: tea.KeySpace, Runes: []rune(" ")},
+	) // select first filtered (BAR)
+	tm.Send(tea.KeyMsg{Type: tea.KeyEscape}) // clear filter
+	tm.Send(
+		tea.KeyMsg{Type: tea.KeyEnter},
+	) // apply and quit
 
 	fm := tm.FinalModel(t, teatest.WithFinalTimeout(2*time.Second))
 	requireModel, ok := fm.(Model)

@@ -12,7 +12,10 @@ import (
 
 // Run loads the config and variables files, then outputs export commands for
 // selected entries. Returns empty string if no entries are selected.
-func Run(ctx context.Context, variablesPath, configPath string) (string, error) {
+func Run(
+	ctx context.Context,
+	variablesPath, configPath string,
+) (string, error) {
 	// Load config
 	cfg, err := config.Load(configPath)
 	if err != nil {

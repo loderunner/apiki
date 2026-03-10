@@ -45,7 +45,10 @@ func Run(ctx context.Context, path string) error {
 	case "password":
 		// Prompt for current password until correct
 		for {
-			password, err := prompt.ReadPassword(ctx, "Enter current password: ")
+			password, err := prompt.ReadPassword(
+				ctx,
+				"Enter current password: ",
+			)
 			if err != nil {
 				return fmt.Errorf("failed to read password: %w", err)
 			}
@@ -99,7 +102,10 @@ func Run(ctx context.Context, path string) error {
 		}
 
 		// Confirm password
-		passwordConfirm, err := prompt.ReadPassword(ctx, "Confirm new password: ")
+		passwordConfirm, err := prompt.ReadPassword(
+			ctx,
+			"Confirm new password: ",
+		)
 		if err != nil {
 			return fmt.Errorf("failed to read password confirmation: %w", err)
 		}

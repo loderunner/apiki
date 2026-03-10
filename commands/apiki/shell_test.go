@@ -34,7 +34,10 @@ func TestGenerateShellCommands(t *testing.T) {
 
 	t.Run("single quote escaping", func(t *testing.T) {
 		es := []Entry{
-			{Entry: entries.Entry{Name: "FOO", Value: "it's working"}, Selected: true},
+			{
+				Entry:    entries.Entry{Name: "FOO", Value: "it's working"},
+				Selected: true,
+			},
 		}
 		envSnapshot := map[string]string{}
 
@@ -56,7 +59,10 @@ func TestGenerateShellCommands(t *testing.T) {
 		es := []Entry{
 			{Entry: entries.Entry{Name: "ENV", Value: "dev"}, Selected: false},
 			{Entry: entries.Entry{Name: "ENV", Value: "prod"}, Selected: true},
-			{Entry: entries.Entry{Name: "ENV", Value: "staging"}, Selected: false},
+			{
+				Entry:    entries.Entry{Name: "ENV", Value: "staging"},
+				Selected: false,
+			},
 		}
 		envSnapshot := map[string]string{"ENV": "dev"}
 

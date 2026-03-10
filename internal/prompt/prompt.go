@@ -50,7 +50,10 @@ func (terminalPrompter) ReadPassword(promptStr string) (string, error) {
 	return string(password), nil
 }
 
-func (t terminalPrompter) ReadChoice(promptStr string, choices map[rune]string) (string, error) {
+func (t terminalPrompter) ReadChoice(
+	promptStr string,
+	choices map[rune]string,
+) (string, error) {
 	return t.ReadChoiceWithDefault(promptStr, choices, "")
 }
 
@@ -94,11 +97,16 @@ func ReadPassword(ctx context.Context, promptStr string) (string, error) {
 // ReadChoice reads a single character choice using the prompter from context.
 // The choices map maps single characters (case-insensitive) to their values.
 // For example, map['p']="password", map['k']="keychain" for p/k choice.
-func ReadChoice(ctx context.Context, promptStr string, choices map[rune]string) (string, error) {
+func ReadChoice(
+	ctx context.Context,
+	promptStr string,
+	choices map[rune]string,
+) (string, error) {
 	return fromContext(ctx).ReadChoice(promptStr, choices)
 }
 
-// ReadChoiceWithDefault reads a single character choice using the prompter from context.
+// ReadChoiceWithDefault reads a single character choice using the prompter from
+// context.
 // If the user presses Enter without typing a character, the default value
 // is returned. Pass an empty string for no default.
 func ReadChoiceWithDefault(
@@ -107,5 +115,7 @@ func ReadChoiceWithDefault(
 	choices map[rune]string,
 	defaultValue string,
 ) (string, error) {
-	return fromContext(ctx).ReadChoiceWithDefault(promptStr, choices, defaultValue)
+	return fromContext(
+		ctx,
+	).ReadChoiceWithDefault(promptStr, choices, defaultValue)
 }
