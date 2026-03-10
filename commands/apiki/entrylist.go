@@ -167,6 +167,10 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+		m = m.persistSelection()
+		if m.mode == modeError {
+			return m, nil
+		}
 		m.quitting = true
 		return m, tea.Quit
 

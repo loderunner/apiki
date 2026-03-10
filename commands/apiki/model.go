@@ -303,7 +303,6 @@ func (m Model) Entries() []Entry {
 // persistEntries saves the current entries to the configured file path.
 // Only saves apiki entries (those without SourceFile).
 // Re-encrypts values if encryption is enabled.
-// Also saves config with selection state.
 // On error, switches to error mode to display the message.
 func (m Model) persistEntries() Model {
 	// Work on a copy to avoid mutating the in-memory state
@@ -340,11 +339,28 @@ func (m Model) persistEntries() Model {
 		return m
 	}
 
-	// Build and save config with selection state
+	// Update in-memory file to match saved state (but keep decrypted)
+	m.file.Entries = apikiEntries
+	return m
+}
+
+// persistSelection saves the current selection state to the config file.
+// On error, switches to error mode to display the message.
+func (m Model) persistSelection() Model {
+	apikiEntries := make([]entries.Entry, 0)
+	for _, entry := range m.entries {
+		if entry.SourceFile == "" {
+			apikiEntries = append(apikiEntries, entries.Entry{
+				Name:  entry.Name,
+				Value: entry.Value,
+				Label: entry.Label,
+			})
+		}
+	}
+
 	cfg := &config.Config{
 		Selected: set.New[string](),
 	}
-	// Map TUI entry indices to apiki entry indices
 	apikiIndex := 0
 	for _, entry := range m.entries {
 		if entry.SourceFile == "" {
@@ -361,7 +377,5 @@ func (m Model) persistEntries() Model {
 		return m
 	}
 
-	// Update in-memory file to match saved state (but keep decrypted)
-	m.file.Entries = apikiEntries
 	return m
 }
