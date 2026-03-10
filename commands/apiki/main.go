@@ -1,6 +1,7 @@
 package apiki
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 // Run executes the apiki root command
-func Run(variablesPath, configPath string) (string, error) {
+func Run(ctx context.Context, variablesPath, configPath string) (string, error) {
 	// Load file (may be encrypted)
 	file, err := entries.Load(variablesPath)
 	if err != nil {
@@ -23,7 +24,7 @@ func Run(variablesPath, configPath string) (string, error) {
 	// Unlock if encrypted
 	var encryptionKey []byte
 	if file.Encrypted() {
-		encryptionKey, err = commands.Unlock(file)
+		encryptionKey, err = commands.Unlock(ctx, file)
 		if err != nil {
 			return "", fmt.Errorf("failed to unlock file: %w", err)
 		}
@@ -44,7 +45,11 @@ func Run(variablesPath, configPath string) (string, error) {
 		}
 	}
 
-	dotEnvEntries, err := LoadDotEnvEntries()
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("could not get working directory: %w", err)
+	}
+	dotEnvEntries, err := LoadDotEnvEntries(pwd)
 	if err != nil {
 		return "", fmt.Errorf("could not load .env variables: %w", err)
 	}

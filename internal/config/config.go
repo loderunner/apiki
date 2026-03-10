@@ -15,6 +15,9 @@ import (
 
 var fs = afero.NewOsFs()
 
+// UseFs sets the filesystem used by Load and Save. Used for test injection.
+func UseFs(f afero.Fs) { fs = f }
+
 // Config represents the apiki configuration file.
 type Config struct {
 	Selected set.Set[string] `json:"selected,omitempty"`

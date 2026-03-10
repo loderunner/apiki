@@ -14,6 +14,9 @@ import (
 
 var fs = afero.NewOsFs()
 
+// UseFs sets the filesystem used by Load and Save. Used for test injection.
+func UseFs(f afero.Fs) { fs = f }
+
 // File represents the on-disk structure (JSON file)
 type File struct {
 	Encryption EncryptionHeader `json:"encryption"`

@@ -34,7 +34,7 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not resolve config file: %w", err)
 			}
-			output, err := apiki.Run(variablesPath, configPath)
+			output, err := apiki.Run(cmd.Context(), variablesPath, configPath)
 			if err != nil {
 				return err
 			}
@@ -74,7 +74,7 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not resolve variables file: %w", err)
 			}
-			err = encrypt.Run(variablesPath)
+			err = encrypt.Run(cmd.Context(), variablesPath)
 			if errors.Is(err, encrypt.ErrNoEntries) {
 				cmd.PrintErrln(err.Error())
 				return nil
@@ -91,7 +91,7 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not resolve variables file: %w", err)
 			}
-			err = decrypt.Run(variablesPath)
+			err = decrypt.Run(cmd.Context(), variablesPath)
 			if errors.Is(err, decrypt.ErrNoEntries) {
 				cmd.PrintErrln(err.Error())
 				return nil
@@ -108,7 +108,7 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not resolve variables file: %w", err)
 			}
-			err = rotate.Run(variablesPath)
+			err = rotate.Run(cmd.Context(), variablesPath)
 			if errors.Is(err, rotate.ErrNoEntries) {
 				cmd.PrintErrln(err.Error())
 				return nil
@@ -129,7 +129,7 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not resolve config file: %w", err)
 			}
-			output, err := restore.Run(variablesPath, configPath)
+			output, err := restore.Run(cmd.Context(), variablesPath, configPath)
 			if err != nil {
 				return err
 			}

@@ -1,6 +1,7 @@
 package rotate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -14,7 +15,7 @@ import (
 var ErrNoEntries = errors.New("no variables to re-encrypt")
 
 // Run executes the rotate command.
-func Run(path string) error {
+func Run(ctx context.Context, path string) error {
 	// Load file
 	file, err := entries.Load(path)
 	if err != nil {
@@ -36,7 +37,7 @@ func Run(path string) error {
 	switch oldMode {
 	case "keychain":
 		fmt.Fprintf(os.Stderr, "Unlocking variables with keychain...\n")
-		oldKey, err = keychain.Retrieve()
+		oldKey, err = keychain.Retrieve(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to retrieve key from keychain: %w", err)
 		}
@@ -44,7 +45,7 @@ func Run(path string) error {
 	case "password":
 		// Prompt for current password until correct
 		for {
-			password, err := prompt.ReadPassword("Enter current password: ")
+			password, err := prompt.ReadPassword(ctx, "Enter current password: ")
 			if err != nil {
 				return fmt.Errorf("failed to read password: %w", err)
 			}
@@ -76,6 +77,7 @@ func Run(path string) error {
 
 	// Ask for new encryption mode
 	newMode, err := prompt.ReadChoice(
+		ctx,
 		"Lock variables with [p]assword or [k]eychain? ",
 		map[rune]string{
 			'p': "password",
@@ -91,13 +93,13 @@ func Run(path string) error {
 	switch newMode {
 	case "password":
 		// Get new password
-		password, err := prompt.ReadPassword("Enter new password: ")
+		password, err := prompt.ReadPassword(ctx, "Enter new password: ")
 		if err != nil {
 			return fmt.Errorf("failed to read password: %w", err)
 		}
 
 		// Confirm password
-		passwordConfirm, err := prompt.ReadPassword("Confirm new password: ")
+		passwordConfirm, err := prompt.ReadPassword(ctx, "Confirm new password: ")
 		if err != nil {
 			return fmt.Errorf("failed to read password confirmation: %w", err)
 		}
@@ -120,10 +122,10 @@ func Run(path string) error {
 		}
 
 		// Delete old keychain entry if it exists
-		_ = keychain.Delete()
+		_ = keychain.Delete(ctx)
 
 		// Store new key in keychain
-		if err := keychain.Store(newKey); err != nil {
+		if err := keychain.Store(ctx, newKey); err != nil {
 			return fmt.Errorf("failed to store key in keychain: %w", err)
 		}
 

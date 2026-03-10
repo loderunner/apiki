@@ -1,6 +1,7 @@
 package restore
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 
 // Run loads the config and variables files, then outputs export commands for
 // selected entries. Returns empty string if no entries are selected.
-func Run(variablesPath, configPath string) (string, error) {
+func Run(ctx context.Context, variablesPath, configPath string) (string, error) {
 	// Load config
 	cfg, err := config.Load(configPath)
 	if err != nil {
@@ -32,7 +33,7 @@ func Run(variablesPath, configPath string) (string, error) {
 	// Unlock if encrypted
 	var encryptionKey []byte
 	if file.Encrypted() {
-		encryptionKey, err = commands.Unlock(file)
+		encryptionKey, err = commands.Unlock(ctx, file)
 		if err != nil {
 			return "", fmt.Errorf("failed to unlock file: %w", err)
 		}

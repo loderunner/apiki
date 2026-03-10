@@ -1,6 +1,7 @@
 package decrypt
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -14,7 +15,7 @@ import (
 var ErrNoEntries = errors.New("no variables to decrypt")
 
 // Run executes the decrypt command.
-func Run(path string) error {
+func Run(ctx context.Context, path string) error {
 	// Load file
 	file, err := entries.Load(path)
 	if err != nil {
@@ -35,7 +36,7 @@ func Run(path string) error {
 	case "keychain":
 		// Retrieve key from keychain
 		fmt.Fprintf(os.Stderr, "Unlocking variables with keychain...\n")
-		key, err = keychain.Retrieve()
+		key, err = keychain.Retrieve(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to retrieve key from keychain: %w", err)
 		}
@@ -43,7 +44,7 @@ func Run(path string) error {
 	case "password":
 		// Prompt for password until correct
 		for {
-			password, err := prompt.ReadPassword("Enter password: ")
+			password, err := prompt.ReadPassword(ctx, "Enter password: ")
 			if err != nil {
 				return fmt.Errorf("failed to read password: %w", err)
 			}
@@ -62,6 +63,7 @@ func Run(path string) error {
 
 	// Ask for confirmation
 	confirm, err := prompt.ReadChoiceWithDefault(
+		ctx,
 		"Values will be stored in plaintext. Continue? [Y/n] ",
 		map[rune]string{
 			'y': "yes",
