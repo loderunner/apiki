@@ -13,8 +13,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	entries.UseFs(afero.NewMemMapFs())
-	config.UseFs(afero.NewMemMapFs())
+	fs := afero.NewMemMapFs()
+	entries.UseFs(fs)
+	config.UseFs(fs)
 	os.Exit(m.Run())
 }
 
