@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	keychainRetrieveErr = errors.New("mock keychain retrieve failed")
-	promptReadErr       = errors.New("mock prompter: no more values")
+	errKeychainRetrieve = errors.New("mock keychain retrieve failed")
+	errPromptRead       = errors.New("mock prompter: no more values")
 )
 
 // MockKeychain implements keychain.Keychain for testing.
@@ -31,7 +31,7 @@ func (m *MockKeychain) Retrieve() ([]byte, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.fail || m.key == nil {
-		return nil, keychainRetrieveErr
+		return nil, errKeychainRetrieve
 	}
 	out := make([]byte, len(m.key))
 	copy(out, m.key)
@@ -74,7 +74,7 @@ func NewMockPrompter(passwords, choices []string) *MockPrompter {
 // ReadPassword returns the next password from the list.
 func (m *MockPrompter) ReadPassword(prompt string) (string, error) {
 	if m.passwordI >= len(m.passwords) {
-		return "", promptReadErr
+		return "", errPromptRead
 	}
 	s := m.passwords[m.passwordI]
 	m.passwordI++
@@ -87,7 +87,7 @@ func (m *MockPrompter) ReadChoice(
 	choices map[rune]string,
 ) (string, error) {
 	if m.choiceI >= len(m.choices) {
-		return "", promptReadErr
+		return "", errPromptRead
 	}
 	s := m.choices[m.choiceI]
 	m.choiceI++
