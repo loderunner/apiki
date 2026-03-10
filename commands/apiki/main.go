@@ -102,7 +102,6 @@ func Run(variablesPath, configPath string) (string, error) {
 
 	// If quitting normally, save entries and output shell commands
 	if m.Quitting() {
-		// Save is handled by persistEntries in the model
 		// Output export/unset commands to stdout
 		output := generateShellCommands(m.Entries(), envSnapshot)
 		return output, nil
