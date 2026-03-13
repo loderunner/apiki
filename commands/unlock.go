@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -11,7 +12,7 @@ import (
 
 // Unlock prompts for password or retrieves key from keychain to unlock
 // an encrypted file. Returns the encryption key.
-func Unlock(file *entries.File) ([]byte, error) {
+func Unlock(ctx context.Context, file *entries.File) ([]byte, error) {
 	if !file.Encrypted() {
 		return nil, fmt.Errorf("file is not encrypted")
 	}
@@ -32,7 +33,7 @@ func Unlock(file *entries.File) ([]byte, error) {
 		// Prompt for password
 		firstAttempt := true
 		for {
-			password, err := prompt.ReadPassword("Enter password: ")
+			password, err := prompt.ReadPassword(ctx, "Enter password: ")
 			if err != nil {
 				return nil, fmt.Errorf("failed to read password: %w", err)
 			}
@@ -52,7 +53,7 @@ func Unlock(file *entries.File) ([]byte, error) {
 	} else if file.Encryption.Mode == "keychain" {
 		// Retrieve from keychain (may trigger Touch ID on macOS)
 		fmt.Fprintf(os.Stderr, "Unlocking variables with keychain...\n")
-		key, err := keychain.Retrieve()
+		key, err := keychain.Retrieve(ctx)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"failed to retrieve key from keychain: %w",

@@ -14,7 +14,7 @@ import (
 
 func TestMain(m *testing.M) {
 	// Use an in-memory filesystem for testing
-	fs = afero.NewMemMapFs()
+	UseFs(afero.NewMemMapFs())
 	os.Exit(m.Run())
 }
 

@@ -79,15 +79,10 @@ func ParseDotEnvFile(path string) ([]Entry, error) {
 	return result, nil
 }
 
-// LoadDotEnvEntries finds and parses all .env files upward from PWD.
+// LoadDotEnvEntries finds and parses all .env files upward from startDir.
 // Returns all entries from all found .env files.
-func LoadDotEnvEntries() ([]Entry, error) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	envFiles, err := FindDotEnvFiles(pwd)
+func LoadDotEnvEntries(startDir string) ([]Entry, error) {
+	envFiles, err := FindDotEnvFiles(startDir)
 	if err != nil {
 		return nil, err
 	}

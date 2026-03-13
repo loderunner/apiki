@@ -1,6 +1,7 @@
 package encrypt
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -14,7 +15,7 @@ import (
 var ErrNoEntries = errors.New("no variables to encrypt")
 
 // Run executes the encrypt command.
-func Run(path string) error {
+func Run(ctx context.Context, path string) error {
 	// Load file
 	file, err := entries.Load(path)
 	if err != nil {
@@ -34,6 +35,7 @@ func Run(path string) error {
 
 	// Ask for encryption mode
 	mode, err := prompt.ReadChoice(
+		ctx,
 		"Lock variables with [p]assword or [k]eychain? ",
 		map[rune]string{
 			'p': "password",
@@ -49,13 +51,13 @@ func Run(path string) error {
 	switch mode {
 	case "password":
 		// Get password
-		password, err := prompt.ReadPassword("Enter password: ")
+		password, err := prompt.ReadPassword(ctx, "Enter password: ")
 		if err != nil {
 			return fmt.Errorf("failed to read password: %w", err)
 		}
 
 		// Confirm password
-		passwordConfirm, err := prompt.ReadPassword("Confirm password: ")
+		passwordConfirm, err := prompt.ReadPassword(ctx, "Confirm password: ")
 		if err != nil {
 			return fmt.Errorf("failed to read password confirmation: %w", err)
 		}
@@ -81,7 +83,7 @@ func Run(path string) error {
 			return fmt.Errorf("failed to generate key: %w", err)
 		}
 
-		if err := keychain.Store(key); err != nil {
+		if err := keychain.Store(ctx, key); err != nil {
 			return fmt.Errorf("failed to store key in keychain: %w", err)
 		}
 
