@@ -2,16 +2,6 @@
 
 **apiki** is a terminal-based environment variable manager that helps you organize, select, and apply environment variables across different projects and contexts.
 
-## Features
-
-- **Terminal User Interface (TUI)** - Navigate and manage variables with keyboard shortcuts
-- **Fuzzy Search** - Quickly find variables by name or description
-- **Radio Button Groups** - Multiple values for the same variable name (e.g., different database URLs)
-- **`.env` File Integration** - Automatically discovers and loads `.env` files from your project directory
-- **Environment Import** - Import variables from your current shell environment
-- **Shell Integration** - Works seamlessly with bash, zsh, and fish
-- **Encryption** - Protect sensitive values with password or keychain-based encryption
-
 [![asciicast](https://asciinema.org/a/C0DBtmgXJ97XOLeG.svg)](https://asciinema.org/a/C0DBtmgXJ97XOLeG)
 
 ## Installation
