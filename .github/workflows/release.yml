@@ -18,7 +18,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: googleapis/release-please-action@v5
@@ -32,7 +32,7 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true' && needs.release-please.outputs.tag_name != ''
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Create local tag for GoReleaser
         run: |
           git config user.name "github-actions[bot]"
@@ -86,7 +86,7 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created != 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v6
